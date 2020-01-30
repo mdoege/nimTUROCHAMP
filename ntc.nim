@@ -221,6 +221,7 @@ proc getmove*(b: Position): string =
         var diff = epochTime() - start
 
         var c = b.move(ll[0][3], ll[0][4])
+        echo fmt"info depth {MAXPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES}"
         return ll[0][1] & ll[0][2]
 
 when isMainModule:
