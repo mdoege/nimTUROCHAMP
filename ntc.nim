@@ -46,12 +46,6 @@ type Position = object
         
 var b = Position(board: ini, score: 0, wc_w: true, wc_e: true, bc_w: true, bc_e: true, ep: 0, kp: 0)
 
-proc is_in(a: int, b: tuple) : bool =
-        for i in b.fields:
-                if a == i:
-                        return true
-        return false
-
 proc render(x: int) : string =
         var r : int = int((x - A8) / 10)
         var f : int = (x - A8) mod 10
@@ -64,7 +58,7 @@ proc gen_moves(s: Position) : seq[(int, int)] =
                 if not p.isUpperAscii():
                         continue
                 #echo i, " ", render(i)
-                for d in dirs[p].items:
+                for d in dirs[p]:
                         if d == 0:
                                 break
                         var j = i + d
@@ -73,11 +67,11 @@ proc gen_moves(s: Position) : seq[(int, int)] =
                                 var q = s.board[j]
                                 if q.isSpaceAscii() or q.isUpperAscii():
                                         break
-                                if p == 'P' and d.is_in((N, N+N)) and q != '.':
+                                if p == 'P' and d in [N, N+N] and q != '.':
                                         break
                                 if p == 'P' and d == N+N and (i < A1+N or s.board[i+N] != '.'):
                                         break
-                                if p == 'P' and d.is_in((N+W, N+E)) and q == '.' and not (j.is_in((s.ep, s.kp, s.kp-1, s.kp+1))):
+                                if p == 'P' and d in [N+W, N+E] and q == '.' and not (j in [s.ep, s.kp, s.kp-1, s.kp+1]):
                                         break
                                 result.add((i, j))
                                 if p == 'P' or p == 'N' or p == 'K' or q.isLowerAscii():
