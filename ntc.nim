@@ -202,6 +202,7 @@ proc myCmp(x, y: tuple): int =
         if x[0] > y[0]: -1 else: 1
 
 proc getmove*(b: Position): string =
+        ## get computer move for board position
         NODES = 0
         var start = epochTime()
         var moves = gen_moves(b)
@@ -223,34 +224,5 @@ proc getmove*(b: Position): string =
         var c = b.move(ll[0][3], ll[0][4])
         echo fmt"info depth {MAXPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES}"
         return ll[0][1] & ll[0][2]
-
-when isMainModule:
-        for n in 1..30:
-                NODES = 0
-                var start = epochTime()
-                var moves = gen_moves(b)
-                var ll: seq[(float, string, string, int, int)]
-                
-                for i in 0..len(moves)-1:
-                        var fr = render(moves[i][0])
-                        var to = render(moves[i][1])
-                        var c = b.move(moves[i][0], moves[i][1])
-                        var d = c.rotate()
-                        var t = searchmax(d, 1, -1e6, 1e6)
-                        t = -t
-                        ll.add((t, fr, to, moves[i][0], moves[i][1]))
-                        #echo i+1, " ", fr, to, " ", moves[i][0], " ", moves[i][1]
-
-                ll.sort(myCmp)
-                echo ll
-
-                var diff = epochTime() - start
-                echo int(float(NODES) / diff), " nps"
-
-                var c = b.move(ll[0][3], ll[0][4])
-
-                echo c.board, c.score, " ", NODES
-
-                b = c.rotate()
 
 
