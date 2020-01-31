@@ -262,10 +262,36 @@ proc turing(s: Position): float =
         ## evaluate Turing positional criteria
         for i in 0..119:
                 var p = s.board[i]
+                var tt: float
                 if not p.isUpperAscii():
                         continue
-                var a = s.attacks(i)
-                result += sqrt(float(len(a)))
+                        
+                # piece mobility
+                if p != 'P':
+                        var a = s.attacks(i)
+                        if len(a) > 0:
+                                for j in a:
+                                        if s.board[j] == '.':
+                                                tt += 1
+                                        else:
+                                                tt += 2
+                        result += sqrt(tt)
+                
+                # King safety
+                if p == 'K':
+                        var ks = Position(board: s.board, score: s.score,
+                                        wc_w: s.wc_w, wc_e: s.wc_e,
+                                        bc_w: s.bc_w, bc_e: s.bc_e, ep: s.ep, kp: s.kp)
+                        tt = 0
+                        ks.board[i] = 'Q'
+                        var ka = ks.attacks(i)
+                        if len(ka) > 0:
+                                for j in ka:
+                                        if s.board[j] == '.':
+                                                tt += 1
+                                        else:
+                                                tt += 2
+                        result -= sqrt(tt)
 
 proc getmove*(b: Position): string =
         ## get computer move for board position
@@ -281,6 +307,7 @@ proc getmove*(b: Position): string =
                 var d = c.rotate()
                 var t = searchmax(d, 1, -1e6, 1e6)
                 t = -t
+                #echo fr, to, " ", t, " ", c.turing()
                 ll.add((t + c.turing() / 1000.0, fr, to, moves[i][0], moves[i][1]))
 
         ll.sort(myCmp)
