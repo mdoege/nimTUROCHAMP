@@ -64,8 +64,8 @@ type Position* = object
 
 proc render*(x: int): string =
         ## convert index to square name
-        var r: int = int((x - A8) / 10)
-        var f: int = (x - A8) mod 10
+        var r = int((x - A8) / 10)
+        var f = (x - A8) mod 10
 
         result = fmt"{char(f + ord('a'))}{8 - r}"
 
@@ -259,6 +259,17 @@ proc attacks*(pos: Position, x: int): seq[int] =
                 if i == x:
                         result.add(j)
 
+proc defenders*(pos: Position, x: int): seq[int] =
+        ## get list of defenders for a square
+        var db = Position(board: pos.board, score: pos.score,
+                        wc_w: pos.wc_w, wc_e: pos.wc_e,
+                        bc_w: pos.bc_w, bc_e: pos.bc_e, ep: pos.ep, kp: pos.kp)
+        db.board[x] = 'p'
+        var moves = db.gen_moves()
+        for (i, j) in moves:
+                if j == x:
+                        result.add(i)
+
 proc turing(s: Position): float =
         ## evaluate Turing positional criteria
         for i in 0..119:
@@ -278,6 +289,12 @@ proc turing(s: Position): float =
                                                 tt += 2
                         result += sqrt(tt)
                 
+                # pieces defended
+                if p == 'R' or p == 'B' or p == 'N':
+                        var ndef = len(s.defenders(i))
+                        if ndef > 0: result += 1
+                        if ndef > 1: result += 0.5
+
                 # King safety
                 if p == 'K':
                         var ks = Position(board: s.board, score: s.score,
@@ -293,6 +310,18 @@ proc turing(s: Position): float =
                                         else:
                                                 tt += 2
                         result -= sqrt(tt)
+
+                # Pawns
+                if p == 'P':
+                        var rad = int(6 - (i - A8) / 10)
+                        result += 0.2 * float(rad)
+
+                        var pdef = s.defenders(i)
+                        var pawndef = false
+                        for k in pdef:
+                                if s.board[k] != 'P':
+                                        pawndef = true
+                        if pawndef: result += 0.3
 
 proc getmove*(b: Position): string =
         ## get computer move for board position
