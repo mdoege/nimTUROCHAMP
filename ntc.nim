@@ -1,6 +1,6 @@
 ## nimTUROCHAMP
 
-import tables, strutils, times, algorithm
+import tables, strutils, times, algorithm, math
 from strformat import fmt
 from unicode import reversed, swapCase
 
@@ -9,7 +9,7 @@ const
         H1 = 98
         A8 = 21
         H8 = 28
-        ini = ("         \n" &
+        ini = ( "         \n" &
                 "         \n" &
                 " rnbqkbnr\n" &
                 " pppppppp\n" &
@@ -19,6 +19,19 @@ const
                 " ........\n" &
                 " PPPPPPPP\n" &
                 " RNBQKBNR\n" &
+                "         \n" &
+                "         \n"
+        )
+        emp = ( "         \n" &
+                "         \n" &
+                " ........\n" &
+                " ........\n" &
+                " ........\n" &
+                " ........\n" &
+                " ........\n" &
+                " ........\n" &
+                " ........\n" &
+                " ........\n" &
                 "         \n" &
                 "         \n"
         )
@@ -41,22 +54,15 @@ var
 
 type Position* = object
         board*: string
-        score: float
-        wc_w: bool
-        wc_e: bool
-        bc_w: bool
-        bc_e: bool
-        ep: int
-        kp: int
+        score*: float
+        wc_w*: bool
+        wc_e*: bool
+        bc_w*: bool
+        bc_e*: bool
+        ep*: int
+        kp*: int
 
-proc newgame*(): Position =
-        ## create a new board in the starting position
-        Position(board: ini, score: 0, wc_w: true, wc_e: true,
-                bc_w: true, bc_e: true, ep: 0, kp: 0) 
-
-var b = newgame()
-
-proc render(x: int): string =
+proc render*(x: int): string =
         ## convert index to square name
         var r: int = int((x - A8) / 10)
         var f: int = (x - A8) mod 10
@@ -72,6 +78,13 @@ proc parse*(c: string, inv = false): int =
                 r = 7 - r
         #echo f, " ", r
         return A1 + f - 10 * r
+
+proc newgame*(): Position =
+        ## create a new board in the starting position
+        Position(board: ini, score: 0, wc_w: true, wc_e: true,
+                bc_w: true, bc_e: true, ep: 0, kp: 0) 
+
+var b = newgame()
 
 proc put(board: string, at: int, piece: char): string =
         ## put piece at board location
@@ -89,7 +102,40 @@ proc rotate*(s: Position): Position =
                 score: -s.score, wc_w: s.bc_w, wc_e: s.bc_e, bc_w: s.wc_w, bc_e: s.wc_e,
                 ep: ep, kp: kp)
 
-proc gen_moves(s: Position): seq[(int, int)] =
+proc fromfen*(fen: string): Position =
+        ## accept a FEN and return a board
+        var b = emp
+
+        var f = fen.split(" ")[0]
+        var cas = fen.split(" ")[2]
+        var enpas = fen.split(" ")[3]
+
+        var i = 0
+        var j = 0
+
+        for x in f:
+                var a = ord(x)
+                if (a > 48) and (a < 57):
+                        i = i + (a - 48)
+                elif a == 47:
+                        i = 0
+                        inc j
+                else:
+                        b[A8 + 10*j + i] = x
+                        inc i
+
+        var ep = 0
+        if enpas != "-":
+                ep = parse(enpas)
+
+        var pos = Position(board: b, score: 0, wc_w: cas.contains('Q'), wc_e: cas.contains('K'),
+                        bc_w: cas.contains('K'), bc_e: cas.contains('Q'), ep: ep, kp: 0)
+
+        if fen.split(" ")[1] == "b":
+                pos = pos.rotate()
+        return pos
+
+proc gen_moves*(s: Position): seq[(int, int)] =
         ## generate all pseudo-legal moves in a position
         for i in 0..119:
                 var p = s.board[i]
@@ -201,6 +247,26 @@ proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
 proc myCmp(x, y: tuple): int =
         if x[0] > y[0]: -1 else: 1
 
+proc isblack(pos: Position): bool =
+        ## is it Black's turn?
+        if pos.board.startsWith('\n'): true else: false
+
+proc attacks*(pos: Position, x: int): seq[int] =
+        ## return attacked empty and enemy squares
+        var moves = pos.gen_moves()
+        for (i, j) in moves:
+                if i == x:
+                        result.add(j)
+
+proc turing(s: Position): float =
+        ## evaluate Turing positional criteria
+        for i in 0..119:
+                var p = s.board[i]
+                if not p.isUpperAscii():
+                        continue
+                var a = s.attacks(i)
+                result += sqrt(float(len(a)))
+
 proc getmove*(b: Position): string =
         ## get computer move for board position
         NODES = 0
@@ -215,7 +281,7 @@ proc getmove*(b: Position): string =
                 var d = c.rotate()
                 var t = searchmax(d, 1, -1e6, 1e6)
                 t = -t
-                ll.add((t, fr, to, moves[i][0], moves[i][1]))
+                ll.add((t + c.turing() / 1000.0, fr, to, moves[i][0], moves[i][1]))
 
         ll.sort(myCmp)
 
