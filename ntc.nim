@@ -338,12 +338,18 @@ proc getmove*(b: Position): string =
         for i in 0..len(moves)-1:
                 var fr = render(moves[i][0])
                 var to = render(moves[i][1])
+                var castle: float
+                if b.board[moves[i][0]] == 'K' and abs(moves[i][0] - moves[i][1]) == 2: castle += 1
                 var c = b.move(moves[i][0], moves[i][1])
+                if c.isblack():
+                        if c.bc_w or c.bc_e: castle += 1
+                else:
+                        if c.wc_w or c.wc_e: castle += 1
                 var d = c.rotate()
                 var t = searchmax(d, 1, -1e6, 1e6)
                 t = -t
                 #echo fr, to, " ", t, " ", c.turing()
-                ll.add((t + c.turing() / 1000.0, fr, to, moves[i][0], moves[i][1]))
+                ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1]))
 
         ll.sort(myCmp)
 
