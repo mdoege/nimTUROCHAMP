@@ -272,21 +272,25 @@ proc defenders*(pos: Position, x: int): seq[int] =
 
 proc turing(s: Position): float =
         ## evaluate Turing positional criteria
+
+        var bking = false
+
         for i in 0..119:
                 var p = s.board[i]
                 var tt: float
-                if not p.isUpperAscii():
-                        continue
+                if not p.isUpperAscii(): continue
                         
+                var a = s.attacks(i)
+                # Black King
+                for j in a:
+                        if s.board[j] == 'k': bking = true
+
                 # piece mobility
                 if p != 'P':
-                        var a = s.attacks(i)
                         if len(a) > 0:
                                 for j in a:
-                                        if s.board[j] == '.':
-                                                tt += 1
-                                        else:
-                                                tt += 2
+                                        if s.board[j] == '.': tt += 1
+                                        else: tt += 2
                         result += sqrt(tt)
                 
                 # pieces defended
@@ -305,10 +309,8 @@ proc turing(s: Position): float =
                         var ka = ks.attacks(i)
                         if len(ka) > 0:
                                 for j in ka:
-                                        if s.board[j] == '.':
-                                                tt += 1
-                                        else:
-                                                tt += 2
+                                        if s.board[j] == '.': tt += 1
+                                        else: tt += 2
                         result -= sqrt(tt)
 
                 # Pawns
@@ -322,6 +324,9 @@ proc turing(s: Position): float =
                                 if s.board[k] != 'P':
                                         pawndef = true
                         if pawndef: result += 0.3
+
+        # Black King
+        if bking: result += 0.5
 
 proc getmove*(b: Position): string =
         ## get computer move for board position
