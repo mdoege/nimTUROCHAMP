@@ -230,7 +230,8 @@ proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
         inc NODES
         if ply >= MAXPLIES:
                 return b.score
-
+        if not ('K' in b.board):
+                return -9999
         var moves = gen_moves(b)
         var al = alpha
         for i in 0..len(moves)-1:
@@ -247,7 +248,7 @@ proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
 proc myCmp(x, y: tuple): int =
         if x[0] > y[0]: -1 else: 1
 
-proc isblack(pos: Position): bool =
+proc isblack*(pos: Position): bool =
         ## is it Black's turn?
         if pos.board.startsWith('\n'): true else: false
 
