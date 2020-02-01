@@ -1,4 +1,5 @@
-## nimTUROCHAMP
+## The nimTUROCHAMP chess engine,
+## an implementation of TUROCHAMP in Nim using the Sunfish move generator
 
 import tables, strutils, times, algorithm, math
 from strformat import fmt
@@ -49,8 +50,8 @@ const
         piece = to_table({'P': 1.0, 'N': 3.0, 'B': 3.5, 'R': 5.0, 'Q': 10.0, 'K': 1000.0})
 
 var
-        MAXPLIES = 4
-        QPLIES = 8
+        MAXPLIES* = 4                    ## brute-force search depth
+        QPLIES* = MAXPLIES + 4           ## selective search depth
         NODES = 0
 
 type Position* = object
@@ -371,7 +372,7 @@ proc getmove*(b: Position): string =
 
 when isMainModule:
         var b: Position
-        var side = true
+        var side = true         # White's turn
 
         proc getgame(x: string): Position =
                 ## construct board from startpos moves command, e.g. from Cute Chess
@@ -450,9 +451,11 @@ when isMainModule:
                 if l == "isready":
                         if b.board == "":
                                 b = newgame()
+                                side = true
                         echo "readyok"
                 if l == "ucinewgame" or l == "position startpos":
                         b = newgame()
+                        side = true
 
                 if l.startsWith("setoption name maxplies value"):
                         MAXPLIES = parseInt(l.split()[4])
@@ -466,9 +469,13 @@ when isMainModule:
                 if l.startsWith("position fen"):
                         b = l.getgame_fen()
                 if l.startsWith("go"):
+                        if b.board == "":
+                                b = newgame()
+                                side = true
                         var m = b.getmove()
                         if not side:
                                 m = m.mirror()
+                        side = not side
                         echo "bestmove ", m
 
 
