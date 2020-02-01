@@ -369,14 +369,41 @@ when isMainModule:
                 ## construct board from startpos moves command, e.g. from Cute Chess
                 var b = newgame()
                 side = true
-                var y = x.split(' ')
+                let mm = x.split(' ')[3..^1]
                 var inv = false
-                for i in 3..len(y)-1:
-                        var fr = parse(y[i][0..1], inv = inv)
-                        var to = parse(y[i][2..3], inv = inv)
+                for i in mm:
+                        var fr = parse(i[0..1], inv = inv)
+                        var to = parse(i[2..3], inv = inv)
                         var c = b.move(fr, to)
                         side = not side
-                        #echo c.board
+
+                        var d = c.rotate()
+                        b = d
+                        inv = not inv
+                return b
+
+        proc getgame_fen(x: string): Position =
+                ## construct board from FEN command, e.g. from Picochess
+
+                var inv: bool
+
+                let
+                        ff = x.split(" ")[2..7]
+                        mm = x.split(" ")[9..^1]
+                        ff2 = ff.join(" ")
+
+                var b = fromfen(ff2)
+                if " w " in ff2:
+                        side = true
+                        inv = false
+                else:
+                        side = false
+                        inv = true
+                for i in mm:
+                        var fr = parse(i[0..1], inv = inv)
+                        var to = parse(i[2..3], inv = inv)
+                        var c = b.move(fr, to)
+                        side = not side
 
                         var d = c.rotate()
                         b = d
@@ -396,6 +423,8 @@ when isMainModule:
 
                 if l == "quit":
                         break
+                if l == "?":
+                        echo b.board
                 if l == "uci":
                         echo "id name nimTUROCHAMP"
                         echo "id author Martin C. Doege"
@@ -407,6 +436,8 @@ when isMainModule:
                         b = newgame()
                 if l.startsWith("position startpos moves"):
                         b = l.getgame()
+                if l.startsWith("position fen"):
+                        b = l.getgame_fen()
                 if l.startsWith("go"):
                         var m = b.getmove()
                         if not side:
