@@ -382,14 +382,21 @@ when isMainModule:
                         inv = not inv
                 return b
 
+        proc shredder(l: string): string =
+                ## fix Shredder FENs
+                let x = l.split(" ")
+                return x[0..5].join(" ") & " 0 1 " & x[6..^1].join(" ")
+
         proc getgame_fen(x: string): Position =
                 ## construct board from FEN command, e.g. from Picochess
 
                 var inv: bool
+                var l: string
 
+                if x.split(" ")[6] == "moves": l = shredder(x) else: l = x
                 let
-                        ff = x.split(" ")[2..7]
-                        mm = x.split(" ")[9..^1]
+                        ff = l.split(" ")[2..7]
+                        mm = l.split(" ")[9..^1]
                         ff2 = ff.join(" ")
 
                 var b = fromfen(ff2)
@@ -428,12 +435,18 @@ when isMainModule:
                 if l == "uci":
                         echo "id name nimTUROCHAMP"
                         echo "id author Martin C. Doege"
+                        echo "option name maxplies type spin default 1 min 0 max 1024"
                         echo "uciok"
                 if l == "isready":
                         #b = newgame()
                         echo "readyok"
                 if l == "ucinewgame" or l == "position startpos":
                         b = newgame()
+
+                if l.startsWith("setoption name maxplies value"):
+                        MAXPLIES = parseInt(l.split()[4])
+                        echo "# maxplies ", MAXPLIES
+
                 if l.startsWith("position startpos moves"):
                         b = l.getgame()
                 if l.startsWith("position fen"):
