@@ -50,6 +50,7 @@ const
 
 var
         MAXPLIES = 4
+        QPLIES = 8
         NODES = 0
 
 type Position* = object
@@ -226,11 +227,18 @@ proc move*(s: Position, fr: int, to: int): Position =
 proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
         ## Negamax search function
         inc NODES
-        if ply >= MAXPLIES:
+        if ply >= QPLIES:
                 return b.score
-        if not ('K' in b.board):
-                return -9999
+        if not ('K' in b.board): return -9999
+        if not ('k' in b.board): return  9999
         var moves = gen_moves(b)
+        if ply > MAXPLIES:
+                var mov2: seq[(int, int)]
+                for i in 0..len(moves)-1:
+                        if b.board[moves[i][1]] != '.':
+                                mov2.add((moves[i][0], moves[i][1]))
+                moves = mov2
+        if len(moves) == 0: return b.score
         var al = alpha
         for i in 0..len(moves)-1:
                 var c = b.move(moves[i][0], moves[i][1])
@@ -348,7 +356,7 @@ proc getmove*(b: Position): string =
                 else:
                         if c.wc_w or c.wc_e: castle += 1
                 var d = c.rotate()
-                var t = searchmax(d, 1, -1e6, 1e6)
+                var t = searchmax(d, 2, -1e6, 1e6)
                 t = -t
                 #echo fr, to, " ", t, " ", c.turing()
                 ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1]))
@@ -358,7 +366,7 @@ proc getmove*(b: Position): string =
         var diff = epochTime() - start
 
         #var c = b.move(ll[0][3], ll[0][4])
-        echo fmt"info depth {MAXPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES}"
+        echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES}"
         return ll[0][1] & ll[0][2]
 
 when isMainModule:
@@ -394,10 +402,8 @@ when isMainModule:
                 var l: string
 
                 if x.split(" ")[6] == "moves": l = shredder(x) else: l = x
-                let
-                        ff = l.split(" ")[2..7]
-                        mm = l.split(" ")[9..^1]
-                        ff2 = ff.join(" ")
+                let ff = l.split(" ")[2..7]
+                let ff2 = ff.join(" ")
 
                 var b = fromfen(ff2)
                 if " w " in ff2:
@@ -406,15 +412,18 @@ when isMainModule:
                 else:
                         side = false
                         inv = true
-                for i in mm:
-                        var fr = parse(i[0..1], inv = inv)
-                        var to = parse(i[2..3], inv = inv)
-                        var c = b.move(fr, to)
-                        side = not side
 
-                        var d = c.rotate()
-                        b = d
-                        inv = not inv
+                if len(l.split(" ")) > 8:
+                        let mm = l.split(" ")[9..^1]
+                        for i in mm:
+                                var fr = parse(i[0..1], inv = inv)
+                                var to = parse(i[2..3], inv = inv)
+                                var c = b.move(fr, to)
+                                side = not side
+
+                                var d = c.rotate()
+                                b = d
+                                inv = not inv
                 return b
 
         proc mirror(x: string): string =
@@ -435,10 +444,12 @@ when isMainModule:
                 if l == "uci":
                         echo "id name nimTUROCHAMP"
                         echo "id author Martin C. Doege"
-                        echo "option name maxplies type spin default 1 min 0 max 1024"
+                        echo fmt"option name maxplies type spin default {MAXPLIES} min 1 max 1024"
+                        echo fmt"option name qplies type spin default {QPLIES} min 1 max 1024"
                         echo "uciok"
                 if l == "isready":
-                        #b = newgame()
+                        if b.board == "":
+                                b = newgame()
                         echo "readyok"
                 if l == "ucinewgame" or l == "position startpos":
                         b = newgame()
@@ -446,6 +457,9 @@ when isMainModule:
                 if l.startsWith("setoption name maxplies value"):
                         MAXPLIES = parseInt(l.split()[4])
                         echo "# maxplies ", MAXPLIES
+                if l.startsWith("setoption name qplies value"):
+                        QPLIES = parseInt(l.split()[4])
+                        echo "# qplies ", QPLIES
 
                 if l.startsWith("position startpos moves"):
                         b = l.getgame()
