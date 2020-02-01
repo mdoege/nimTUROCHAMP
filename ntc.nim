@@ -255,7 +255,9 @@ proc isblack*(pos: Position): bool =
 proc attacks*(pos: Position, x: int): seq[int] =
         ## return attacked empty and enemy squares
         var moves = pos.gen_moves()
-        for (i, j) in moves:
+        for n in 0..len(moves)-1:
+                let i = moves[n][0]
+                let j = moves[n][1]
                 if i == x:
                         result.add(j)
 
@@ -266,7 +268,9 @@ proc defenders*(pos: Position, x: int): seq[int] =
                         bc_w: pos.bc_w, bc_e: pos.bc_e, ep: pos.ep, kp: pos.kp)
         db.board[x] = 'p'
         var moves = db.gen_moves()
-        for (i, j) in moves:
+        for n in 0..len(moves)-1:
+                let i = moves[n][0]
+                let j = moves[n][1]
                 if j == x:
                         result.add(i)
 
