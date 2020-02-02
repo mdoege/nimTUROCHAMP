@@ -50,8 +50,8 @@ const
         piece = to_table({'P': 1.0, 'N': 3.0, 'B': 3.5, 'R': 5.0, 'Q': 10.0, 'K': 1000.0})
 
 var
-        MAXPLIES* = 4                    ## brute-force search depth
-        QPLIES* = MAXPLIES + 4           ## selective search depth
+        MAXPLIES* = 2                    ## brute-force search depth
+        QPLIES* = 8                      ## selective search depth
         NODES = 0
 
 type Position* = object
@@ -225,33 +225,6 @@ proc move*(s: Position, fr: int, to: int): Position =
         return Position(board: board, score: score,
                 wc_w: wc_w, wc_e: wc_e, bc_w: bc_w, bc_e: bc_e, ep: ep, kp: kp)
 
-proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
-        ## Negamax search function
-        inc NODES
-        if ply >= QPLIES:
-                return b.score
-        if not ('K' in b.board): return -9999
-        if not ('k' in b.board): return  9999
-        var moves = gen_moves(b)
-        if ply > MAXPLIES:
-                var mov2: seq[(int, int)]
-                for i in 0..len(moves)-1:
-                        if b.board[moves[i][1]] != '.':
-                                mov2.add((moves[i][0], moves[i][1]))
-                moves = mov2
-        if len(moves) == 0: return b.score
-        var al = alpha
-        for i in 0..len(moves)-1:
-                var c = b.move(moves[i][0], moves[i][1])
-                var d = c.rotate()
-                var t = searchmax(d, ply + 1, -beta, -al)
-                t = -t
-                if t >= beta:
-                        return beta
-                if t > al:
-                        al = t
-        return al
-
 proc myCmp(x, y: tuple): int =
         if x[0] > y[0]: -1 else: 1
 
@@ -280,6 +253,72 @@ proc defenders*(pos: Position, x: int): seq[int] =
                 let j = moves[n][1]
                 if j == x:
                         result.add(i)
+
+proc isdead(s: Position, mm: seq[(int, int)]): bool =
+        ## is the position dead?
+        var check = false
+        for i in 0..119:
+                var p = s.board[i]
+                if not p.isUpperAscii(): continue
+                        
+                var a = s.attacks(i)
+                # other player's King
+                for j in a:
+                        if s.board[j] == 'k': check = true
+        if check: return false
+
+        for m in mm:
+                var p = s.board[m[0]]
+                var q = s.board[m[1]]
+                if q != '.':
+                        if len(s.defenders(m[1])) > 0 or
+                          (piece[q.toUpperAscii()] > piece[p.toUpperAscii()]): return false
+        return true
+
+proc order(b: Position, ply: int, moves: seq[(int, int)]): seq[(int, int)] =
+        ## order moves by importance
+        if ply > 1: return moves        # only sort at top level of search
+
+        var mlist: seq[(float, int, int)]
+        for m in moves:
+                var p = b.board[m[0]]
+                var q = b.board[m[1]]
+                if q != '.':
+                        mlist.add((10*piece[q.toUpperAscii()] - piece[p.toUpperAscii()], m[0], m[1]))
+                else:
+                        mlist.add((10                         - piece[p.toUpperAscii()], m[0], m[1]))
+        mlist.sort(myCmp)
+        for m in mlist:
+                result.add((m[1], m[2]))
+
+proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
+        ## Negamax search function
+        inc NODES
+        if ply >= QPLIES:
+                return b.score
+        if not ('K' in b.board): return -9999
+        if not ('k' in b.board): return  9999
+        var moves = order(b, ply, gen_moves(b))
+        if ply > MAXPLIES and b.isdead(moves):
+                return b.score
+        if ply > MAXPLIES:
+                var mov2: seq[(int, int)]
+                for i in 0..len(moves)-1:
+                        if b.board[moves[i][1]] != '.':
+                                mov2.add((moves[i][0], moves[i][1]))
+                moves = mov2
+        if len(moves) == 0: return b.score
+        var al = alpha
+        for i in 0..len(moves)-1:
+                var c = b.move(moves[i][0], moves[i][1])
+                var d = c.rotate()
+                var t = searchmax(d, ply + 1, -beta, -al)
+                t = -t
+                if t >= beta:
+                        return beta
+                if t > al:
+                        al = t
+        return al
 
 proc turing(s: Position): float =
         ## evaluate Turing positional criteria
@@ -357,7 +396,7 @@ proc getmove*(b: Position): string =
                 else:
                         if c.wc_w or c.wc_e: castle += 1
                 var d = c.rotate()
-                var t = searchmax(d, 2, -1e6, 1e6)
+                var t = searchmax(d, 1, -1e6, 1e6)
                 t = -t
                 #echo fr, to, " ", t, " ", c.turing()
                 ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1]))
@@ -367,7 +406,8 @@ proc getmove*(b: Position): string =
         var diff = epochTime() - start
 
         #var c = b.move(ll[0][3], ll[0][4])
-        echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES}"
+        var nps = int(float(NODES) / diff)
+        echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES} nps {nps}"
         return ll[0][1] & ll[0][2]
 
 when isMainModule:
