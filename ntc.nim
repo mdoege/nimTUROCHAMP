@@ -410,7 +410,7 @@ proc getmove*(b: Position): string =
         echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES} nps {nps}"
         return ll[0][1] & ll[0][2]
 
-when isMainModule:
+proc main() =
         var b: Position
         var side = true         # White's turn
 
@@ -518,4 +518,6 @@ when isMainModule:
                         side = not side
                         echo "bestmove ", m
 
+when isMainModule:
+        main()
 
