@@ -48,6 +48,7 @@ const
         'K': [N, E, S, W, N+E, S+E, S+W, N+W]
         })
         piece = to_table({'P': 1.0, 'N': 3.0, 'B': 3.5, 'R': 5.0, 'Q': 10.0, 'K': 1000.0})
+        piece_type = to_table({'P': 1.0, 'N': 2.0, 'B': 3.0, 'R': 4.0, 'Q': 5.0, 'K': 6.0})
 
 var
         MAXPLIES* = 2                    ## brute-force search depth
@@ -278,16 +279,16 @@ proc isdead(s: Position, mm: seq[(int, int)]): bool =
 
 proc order(b: Position, ply: int, moves: seq[(int, int)]): seq[(int, int)] =
         ## order moves by importance
-        if ply > 1: return moves        # only sort at top level of search
-
         var mlist: seq[(float, int, int)]
         for m in moves:
-                var p = b.board[m[0]]
-                var q = b.board[m[1]]
+                var p = b.board[m[0]].toUpperAscii
+                var q = b.board[m[1]].toUpperAscii
                 if q != '.':
-                        mlist.add((10*piece[q.toUpperAscii()] - piece[p.toUpperAscii()], m[0], m[1]))
+                        mlist.add((10 * piece_type[q] - piece_type[p], m[0], m[1]))
+                elif m[1] == b.ep:
+                        mlist.add((10 - piece_type[p], m[0], m[1]))
                 else:
-                        mlist.add((10                         - piece[p.toUpperAscii()], m[0], m[1]))
+                        mlist.add((piece_type[p], m[0], m[1]))
         mlist.sort(myCmp)
         for m in mlist:
                 result.add((m[1], m[2]))
