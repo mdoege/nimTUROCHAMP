@@ -63,6 +63,7 @@ type Position* = object
         bc_e*: bool
         ep*: int
         kp*: int
+        lastcap*: int
 
 proc render*(x: int): string =
         ## convert index to square name
@@ -186,7 +187,7 @@ proc move*(s: Position, fr: int, to: int): Position =
         ## carry out a move on the board
         let
                 p = s.board[fr]
-                #q = s.board[to]
+                q = s.board[to]
         var
                 board = s.board
                 score = s.score + s.value(fr, to)
@@ -196,7 +197,9 @@ proc move*(s: Position, fr: int, to: int): Position =
                 bc_e = s.bc_e
                 ep = 0
                 kp = 0
-        board = put(board, to, board[fr])
+                lastcap = 0
+        if q != '.': lastcap = to else: lastcap = 0
+        board = put(board, to, p)
         board = put(board, fr, '.')
         if fr == A1: wc_w = false
         if fr == H1: wc_e = false
@@ -223,7 +226,7 @@ proc move*(s: Position, fr: int, to: int): Position =
                         board = put(board, to+S, '.')
 
         return Position(board: board, score: score,
-                wc_w: wc_w, wc_e: wc_e, bc_w: bc_w, bc_e: bc_e, ep: ep, kp: kp)
+                wc_w: wc_w, wc_e: wc_e, bc_w: bc_w, bc_e: bc_e, ep: ep, kp: kp, lastcap: lastcap)
 
 proc myCmp(x, y: tuple): int =
         if x[0] > y[0]: -1 else: 1
@@ -268,11 +271,9 @@ proc isdead(s: Position, mm: seq[(int, int)]): bool =
         if check: return false
 
         for m in mm:
-                var p = s.board[m[0]]
+                #var p = s.board[m[0]]
                 var q = s.board[m[1]]
-                if q != '.':
-                        if len(s.defenders(m[1])) > 0 or
-                          (piece[q.toUpperAscii()] > piece[p.toUpperAscii()]): return false
+                if q != '.' and s.lastcap > 0 and m[1] == 119 - s.lastcap: return false
         return true
 
 proc order(b: Position, ply: int, moves: seq[(int, int)]): seq[(int, int)] =
