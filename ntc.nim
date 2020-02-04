@@ -108,9 +108,9 @@ proc fromfen*(fen: string): Position =
         ## accept a FEN and return a board
         var b = emp
 
-        var f = fen.split(" ")[0]
-        var cas = fen.split(" ")[2]
-        var enpas = fen.split(" ")[3]
+        let f = fen.split(" ")[0]
+        let cas = fen.split(" ")[2]
+        let enpas = fen.split(" ")[3]
 
         var i = 0
         var j = 0
@@ -140,7 +140,7 @@ proc fromfen*(fen: string): Position =
 proc gen_moves*(s: Position): seq[(int, int)] =
         ## generate all pseudo-legal moves in a position
         for i in 0..119:
-                var p = s.board[i]
+                let p = s.board[i]
                 if not p.isUpperAscii():
                         continue
                 #echo i, " ", render(i)
@@ -150,7 +150,7 @@ proc gen_moves*(s: Position): seq[(int, int)] =
                         var j = i + d
                         while true:
                                 #echo render(j)
-                                var q = s.board[j]
+                                let q = s.board[j]
                                 if q.isSpaceAscii() or q.isUpperAscii():
                                         break
                                 if p == 'P' and d in [N, N+N] and q != '.':
@@ -173,9 +173,8 @@ proc gen_moves*(s: Position): seq[(int, int)] =
 
 proc value(s: Position, fr: int, to: int): float =
         ## compute score difference due to given move
-        let
-                p = s.board[fr]
-                q = s.board[to]
+        let p = s.board[fr]
+        let q = s.board[to]
         if q.isLowerAscii():
                 result += piece[q.toUpperAscii()]
         if p == 'P':
@@ -186,9 +185,8 @@ proc value(s: Position, fr: int, to: int): float =
 
 proc move*(s: Position, fr: int, to: int): Position =
         ## carry out a move on the board
-        let
-                p = s.board[fr]
-                q = s.board[to]
+        let p = s.board[fr]
+        let q = s.board[to]
         var
                 board = s.board
                 score = s.score + s.value(fr, to)
@@ -238,7 +236,7 @@ proc isblack*(pos: Position): bool =
 
 proc attacks*(pos: Position, x: int): seq[int] =
         ## return attacked empty and enemy squares
-        var moves = pos.gen_moves()
+        let moves = pos.gen_moves()
         for n in 0..len(moves)-1:
                 let i = moves[n][0]
                 let j = moves[n][1]
@@ -251,7 +249,7 @@ proc defenders*(pos: Position, x: int): seq[int] =
                         wc_w: pos.wc_w, wc_e: pos.wc_e,
                         bc_w: pos.bc_w, bc_e: pos.bc_e, ep: pos.ep, kp: pos.kp)
         db.board[x] = 'p'
-        var moves = db.gen_moves()
+        let moves = db.gen_moves()
         for n in 0..len(moves)-1:
                 let i = moves[n][0]
                 let j = moves[n][1]
@@ -262,18 +260,18 @@ proc isdead(s: Position, mm: seq[(int, int)]): bool =
         ## is the position dead?
         var check = false
         for i in 0..119:
-                var p = s.board[i]
+                let p = s.board[i]
                 if not p.isUpperAscii(): continue
                         
-                var a = s.attacks(i)
+                let a = s.attacks(i)
                 # other player's King
                 for j in a:
                         if s.board[j] == 'k': check = true
         if check: return false
 
         for m in mm:
-                #var p = s.board[m[0]]
-                var q = s.board[m[1]]
+                #let p = s.board[m[0]]
+                let q = s.board[m[1]]
                 if q != '.' and s.lastcap > 0 and m[1] == 119 - s.lastcap: return false
         return true
 
@@ -281,8 +279,8 @@ proc order(b: Position, ply: int, moves: seq[(int, int)]): seq[(int, int)] =
         ## order moves by importance
         var mlist: seq[(float, int, int)]
         for m in moves:
-                var p = b.board[m[0]].toUpperAscii
-                var q = b.board[m[1]].toUpperAscii
+                let p = b.board[m[0]].toUpperAscii
+                let q = b.board[m[1]].toUpperAscii
                 if q != '.':
                         mlist.add((10 * piece_type[q] - piece_type[p], m[0], m[1]))
                 elif m[1] == b.ep:
@@ -312,10 +310,9 @@ proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
         if len(moves) == 0: return b.score
         var al = alpha
         for i in 0..len(moves)-1:
-                var c = b.move(moves[i][0], moves[i][1])
-                var d = c.rotate()
-                var t = searchmax(d, ply + 1, -beta, -al)
-                t = -t
+                let c = b.move(moves[i][0], moves[i][1])
+                let d = c.rotate()
+                let t = -searchmax(d, ply + 1, -beta, -al)
                 if t >= beta:
                         return beta
                 if t > al:
@@ -328,11 +325,11 @@ proc turing(s: Position): float =
         var bking = false
 
         for i in 0..119:
-                var p = s.board[i]
+                let p = s.board[i]
                 var tt: float
                 if not p.isUpperAscii(): continue
                         
-                var a = s.attacks(i)
+                let a = s.attacks(i)
                 # Black King
                 for j in a:
                         if s.board[j] == 'k': bking = true
@@ -347,7 +344,7 @@ proc turing(s: Position): float =
                 
                 # pieces defended
                 if p == 'R' or p == 'B' or p == 'N':
-                        var ndef = len(s.defenders(i))
+                        let ndef = len(s.defenders(i))
                         if ndef > 0: result += 1
                         if ndef > 1: result += 0.5
 
@@ -358,7 +355,7 @@ proc turing(s: Position): float =
                                         bc_w: s.bc_w, bc_e: s.bc_e, ep: s.ep, kp: s.kp)
                         tt = 0
                         ks.board[i] = 'Q'
-                        var ka = ks.attacks(i)
+                        let ka = ks.attacks(i)
                         if len(ka) > 0:
                                 for j in ka:
                                         if s.board[j] == '.': tt += 1
@@ -367,10 +364,10 @@ proc turing(s: Position): float =
 
                 # Pawns
                 if p == 'P':
-                        var rad = int(6 - (i - A8) / 10)
+                        let rad = int(6 - (i - A8) / 10)
                         result += 0.2 * float(rad)
 
-                        var pdef = s.defenders(i)
+                        let pdef = s.defenders(i)
                         var pawndef = false
                         for k in pdef:
                                 if s.board[k] != 'P':
@@ -380,35 +377,33 @@ proc turing(s: Position): float =
         # Black King
         if bking: result += 0.5
 
-proc getmove*(b: Position): string =
+proc getmove*(b: Position, output = false): string =
         ## get computer move for board position
         NODES = 0
-        var start = epochTime()
-        var moves = gen_moves(b)
+        let start = epochTime()
+        let moves = gen_moves(b)
         var ll: seq[(float, string, string, int, int)]
                 
         for i in 0..len(moves)-1:
-                var fr = render(moves[i][0])
-                var to = render(moves[i][1])
+                let fr = render(moves[i][0])
+                let to = render(moves[i][1])
                 var castle: float
                 if b.board[moves[i][0]] == 'K' and abs(moves[i][0] - moves[i][1]) == 2: castle += 1
-                var c = b.move(moves[i][0], moves[i][1])
+                let c = b.move(moves[i][0], moves[i][1])
                 if c.isblack():
                         if c.bc_w or c.bc_e: castle += 1
                 else:
                         if c.wc_w or c.wc_e: castle += 1
-                var d = c.rotate()
-                var t = searchmax(d, 1, -1e6, 1e6)
-                t = -t
-                #echo fr, to, " ", t, " ", c.turing()
+                let d = c.rotate()
+                let t = -searchmax(d, 1, -1e6, 1e6)
+                if output:
+                        echo fr, to, " ", t, " ", c.turing()
                 ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1]))
 
         ll.sort(myCmp)
 
-        var diff = epochTime() - start
-
-        #var c = b.move(ll[0][3], ll[0][4])
-        var nps = int(float(NODES) / diff)
+        let diff = epochTime() - start
+        let nps = int(float(NODES) / diff)
         echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES} nps {nps}"
         return ll[0][1] & ll[0][2]
 
@@ -459,26 +454,26 @@ proc main() =
                 if len(l.split(" ")) > 8:
                         let mm = l.split(" ")[9..^1]
                         for i in mm:
-                                var fr = parse(i[0..1], inv = inv)
-                                var to = parse(i[2..3], inv = inv)
-                                var c = b.move(fr, to)
+                                let fr = parse(i[0..1], inv = inv)
+                                let to = parse(i[2..3], inv = inv)
+                                let c = b.move(fr, to)
                                 side = not side
 
-                                var d = c.rotate()
+                                let d = c.rotate()
                                 b = d
                                 inv = not inv
                 return b
 
         proc mirror(x: string): string =
                 ## mirror move for Black
-                var f1 = char(ord('a') + 7 - (ord(x[0]) - ord('a')))
-                var f2 = char(ord('a') + 7 - (ord(x[2]) - ord('a')))
-                var r1 = char(ord('1') + 7 - (ord(x[1]) - ord('1')))
-                var r2 = char(ord('1') + 7 - (ord(x[3]) - ord('1')))
+                let f1 = char(ord('a') + 7 - (ord(x[0]) - ord('a')))
+                let f2 = char(ord('a') + 7 - (ord(x[2]) - ord('a')))
+                let r1 = char(ord('1') + 7 - (ord(x[1]) - ord('1')))
+                let r2 = char(ord('1') + 7 - (ord(x[3]) - ord('1')))
                 return f1 & r1 & f2 & r2
 
         while true:
-                var l = readLine(stdin)
+                let l = readLine(stdin)
 
                 if l == "quit":
                         break
