@@ -57,14 +57,14 @@ var
 
 type Position* = object
         board*: string
-        score*: float
-        wc_w*: bool
+        score*: float           # material score
+        wc_w*: bool             # castling rights (White/Black West/East)
         wc_e*: bool
         bc_w*: bool
         bc_e*: bool
-        ep*: int
-        kp*: int
-        lastcap*: int
+        ep*: int                # en-passant square
+        kp*: int                # King's passant square
+        lastcap*: int           # target square of preceding capture move
 
 proc render*(x: int): string =
         ## convert index to square name
@@ -96,13 +96,16 @@ proc rotate*(s: Position): Position =
         ## rotate board for other player's turn
         var ep = 0
         var kp = 0
+        var lastcap = 0
         if s.ep > 0:
                 ep = 119 - s.ep
         if s.kp > 0:
                 kp = 119 - s.kp
+        if s.lastcap > 0:
+                lastcap = 119 - s.lastcap
         return Position(board: s.board.reversed.swapCase(),
                 score: -s.score, wc_w: s.bc_w, wc_e: s.bc_e, bc_w: s.wc_w, bc_e: s.wc_e,
-                ep: ep, kp: kp)
+                ep: ep, kp: kp, lastcap: lastcap)
 
 proc fromfen*(fen: string): Position =
         ## accept a FEN and return a board
@@ -272,7 +275,7 @@ proc isdead(s: Position, mm: seq[(int, int)]): bool =
         for m in mm:
                 #let p = s.board[m[0]]
                 let q = s.board[m[1]]
-                if q != '.' and s.lastcap > 0 and m[1] == 119 - s.lastcap: return false
+                if q != '.' and s.lastcap > 0 and m[1] == s.lastcap: return false
         return true
 
 proc order(b: Position, ply: int, moves: seq[(int, int)]): seq[(int, int)] =
@@ -405,7 +408,9 @@ proc getmove*(b: Position, output = false): string =
         let diff = epochTime() - start
         let nps = int(float(NODES) / diff)
         echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES} nps {nps}"
-        return ll[0][1] & ll[0][2]
+        result = ll[0][1] & ll[0][2]
+        if b.board[ll[0][3]] == 'P' and (A8 <= ll[0][4]) and (ll[0][4] <= H8):
+                result = result & "q"
 
 proc main() =
         var b: Position
