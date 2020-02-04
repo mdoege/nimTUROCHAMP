@@ -4,7 +4,7 @@ A TUROCHAMP implementation in [Nim](https://nim-lang.org/) which uses the [Sunfi
 
 ## Compilation
 
- nim c -d:release ntc
+ nim c -d:release --passC:"-flto" ntc
 
 ## UCI parameters
 
