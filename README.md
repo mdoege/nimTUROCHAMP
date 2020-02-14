@@ -2,6 +2,8 @@
 
 A TUROCHAMP implementation in [Nim](https://nim-lang.org/) which uses the [Sunfish](https://github.com/thomasahle/sunfish) move generator and works as an UCI binary. Based on the [pyturochamp.py](https://github.com/mdoege/PyTuroChamp) code.
 
+Here is a [web browser-based demo](https://mdoege.github.io/nimTUROCHAMP/) of nimTUROCHAMP built with "nim js".
+
 ## Compilation
 
  nim c -d:release --passC:"-flto" ntc
