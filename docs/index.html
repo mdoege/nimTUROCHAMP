@@ -83,6 +83,7 @@ $(document).ready(function() {
 		
 		worker.postMessage(fen);
 		thetitle.innerHTML = "Calculating&hellip;";
+		$("#moveBtn").prop('disabled', true);
 	}
 
 	function recmove(data) {
@@ -128,6 +129,7 @@ $(document).ready(function() {
 		fentext.innerHTML = fen;
 		console.log(fen);
 		spgn.innerHTML = chess.pgn();
+		$("#moveBtn").prop('disabled', false);
 
 		var pnames = {
 			"p": "pawn",
