@@ -74,9 +74,11 @@ $(document).ready(function() {
 	var chess = new Chess();
 	$("#moveBtn").on("click", getmove);
 
-	var myfen = "6k1/4pppQ/8/8/7R/8/6K1/8 b - - 0 1";
-	//board1.position(myfen);
-	//chess.load(myfen);
+	// test position
+/*	var myfen = "7R/1k1p4/7R/4P3/8/8/6K1/R1R5 b - - 0 1";
+	board1.position(myfen);
+	chess.load(myfen);
+	console.log(chess.ascii());	*/
 
 	function getmove() {
 		var fen = chess.fen();
@@ -93,7 +95,7 @@ $(document).ready(function() {
 		var lastmove = chess.history({ verbose: true });
 		if (lastmove.length > 0) {
 			lastmove = lastmove[lastmove.length - 1];
-			if (lastmove.flags.includes("p")) {
+			if (lastmove.flags.includes("p") || lastmove.flags.includes("e")) {
 				board1.position(chess.fen());
 			}
 		}
@@ -122,7 +124,7 @@ $(document).ready(function() {
 		} else if ((mymove.from == "e1" && mymove.to == "c1") || (mymove.from == "e8" && mymove.to == "c8")) {
 			board1.position(chess.fen());
 		}
-		if (mymove.flags.includes("p")) {
+		if (mymove.flags.includes("p") || mymove.flags.includes("e")) {
 			board1.position(chess.fen());
 		}
 		var fen = chess.fen();
