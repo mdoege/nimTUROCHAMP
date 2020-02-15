@@ -26,6 +26,8 @@ $(document).ready(function() {
 	function talk(text) {
 		var msg = new SpeechSynthesisUtterance(text);
 		msg.lang = "en-US";
+		msg.pitch = 1;
+		msg.rate = 1;
 		if (myvoice != "") {
 			msg.voice = myvoice;
 		}
