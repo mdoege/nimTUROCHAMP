@@ -237,6 +237,24 @@ proc isblack*(pos: Position): bool =
         ## is it Black's turn?
         if pos.board.startsWith('\n'): true else: false
 
+proc mirror(x: string): string =
+        ## mirror move for Black
+        let f1 = char(ord('a') + 7 - (ord(x[0]) - ord('a')))
+        let f2 = char(ord('a') + 7 - (ord(x[2]) - ord('a')))
+        let r1 = char(ord('1') + 7 - (ord(x[1]) - ord('1')))
+        let r2 = char(ord('1') + 7 - (ord(x[3]) - ord('1')))
+        if x.len == 4:
+                return f1 & r1 & f2 & r2
+        else:   # piece promotion
+                return f1 & r1 & f2 & r2 & x[4]
+
+proc mirrmv(pos: Position, x: string): string =
+        ## mirror move if it is Black's turn
+        if pos.isblack:
+                return x.mirror
+        else:
+                return x
+
 proc attacks*(pos: Position, x: int): seq[int] =
         ## return attacked empty and enemy squares
         let moves = pos.gen_moves()
@@ -294,33 +312,38 @@ proc order(b: Position, ply: int, moves: seq[(int, int)]): seq[(int, int)] =
         for m in mlist:
                 result.add((m[1], m[2]))
 
-proc searchmax(b: Position, ply: int, alpha: float, beta: float): float =
+proc searchmax(b: Position, ply: int, alpha: float, beta: float, pv: string): (float, string) =
         ## Negamax search function
         inc NODES
         if ply >= QPLIES:
-                return b.score
-        if not ('K' in b.board): return -9999
-        if not ('k' in b.board): return  9999
+                return (b.score, pv)
+        if not ('K' in b.board): return (-9999.0, pv)
+        if not ('k' in b.board): return (9999.0, pv)
         var moves = order(b, ply, gen_moves(b))
         if ply > MAXPLIES and b.isdead(moves):
-                return b.score
+                return (b.score, pv)
         if ply > MAXPLIES:
                 var mov2: seq[(int, int)]
                 for i in 0..len(moves)-1:
                         if b.board[moves[i][1]] != '.':
                                 mov2.add((moves[i][0], moves[i][1]))
                 moves = mov2
-        if len(moves) == 0: return b.score
+        if len(moves) == 0: return (b.score, pv)
         var al = alpha
+        var v = pv
         for i in 0..len(moves)-1:
                 let c = b.move(moves[i][0], moves[i][1])
                 let d = c.rotate()
-                let t = -searchmax(d, ply + 1, -beta, -al)
+                let fr = render(moves[i][0])
+                let to = render(moves[i][1])
+                var (t, vv) = searchmax(d, ply + 1, -beta, -al, pv & " " & c.mirrmv(fr & to))
+                t = -t
                 if t >= beta:
-                        return beta
+                        return (beta, vv)
                 if t > al:
                         al = t
-        return al
+                        v = vv
+        return (al, v)
 
 proc turing(s: Position): float =
         ## evaluate Turing positional criteria
@@ -385,7 +408,7 @@ proc getmove*(b: Position, output = false): string =
         NODES = 0
         let start = epochTime()
         let moves = gen_moves(b)
-        var ll: seq[(float, string, string, int, int)]
+        var ll: seq[(float, string, string, int, int, string)]
                 
         for i in 0..len(moves)-1:
                 let fr = render(moves[i][0])
@@ -398,16 +421,17 @@ proc getmove*(b: Position, output = false): string =
                 else:
                         if c.wc_w or c.wc_e: castle += 1
                 let d = c.rotate()
-                let t = -searchmax(d, 1, -1e6, 1e6)
+                var (t, pv) = searchmax(d, 2, -1e6, 1e6, c.mirrmv(fr & to))
+                t = -t
                 if output:
-                        echo fr, to, " ", t, " ", c.turing()
-                ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1]))
+                        echo fr, to, " ", t, " ", c.turing(), " ", pv
+                ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1], pv))
 
         ll.sort(myCmp)
 
         let diff = epochTime() - start
         let nps = int(float(NODES) / diff)
-        echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES} nps {nps}"
+        echo fmt"info depth {MAXPLIES} seldepth {QPLIES} score cp {int(100*ll[0][0])} time {int(1000*diff)} nodes {NODES} nps {nps} pv {ll[0][5]}"
         result = ll[0][1] & ll[0][2]
         if b.board[ll[0][3]] == 'P' and (A8 <= ll[0][4]) and (ll[0][4] <= H8):
                 result = result & "q"
@@ -468,14 +492,6 @@ proc main() =
                                 b = d
                                 inv = not inv
                 return b
-
-        proc mirror(x: string): string =
-                ## mirror move for Black
-                let f1 = char(ord('a') + 7 - (ord(x[0]) - ord('a')))
-                let f2 = char(ord('a') + 7 - (ord(x[2]) - ord('a')))
-                let r1 = char(ord('1') + 7 - (ord(x[1]) - ord('1')))
-                let r2 = char(ord('1') + 7 - (ord(x[3]) - ord('1')))
-                return f1 & r1 & f2 & r2
 
         while true:
                 let l = readLine(stdin)
