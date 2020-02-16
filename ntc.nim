@@ -237,7 +237,7 @@ proc isblack*(pos: Position): bool =
         ## is it Black's turn?
         if pos.board.startsWith('\n'): true else: false
 
-proc mirror(x: string): string =
+proc mirror*(x: string): string =
         ## mirror move for Black
         let f1 = char(ord('a') + 7 - (ord(x[0]) - ord('a')))
         let f2 = char(ord('a') + 7 - (ord(x[2]) - ord('a')))
@@ -436,106 +436,106 @@ proc getmove*(b: Position, output = false): string =
         if b.board[ll[0][3]] == 'P' and (A8 <= ll[0][4]) and (ll[0][4] <= H8):
                 result = result & "q"
 
-proc main() =
-        var b: Position
-        var side = true         # White's turn
+when isMainModule:
+        proc main() =
+                var b: Position
+                var side = true         # White's turn
 
-        proc getgame(x: string): Position =
-                ## construct board from startpos moves command, e.g. from Cute Chess
-                var b = newgame()
-                side = true
-                let mm = x.split(' ')[3..^1]
-                var inv = false
-                for i in mm:
-                        var fr = parse(i[0..1], inv = inv)
-                        var to = parse(i[2..3], inv = inv)
-                        var c = b.move(fr, to)
-                        side = not side
-
-                        var d = c.rotate()
-                        b = d
-                        inv = not inv
-                return b
-
-        proc shredder(l: string): string =
-                ## fix Shredder FENs
-                let x = l.split(" ")
-                return x[0..5].join(" ") & " 0 1 " & x[6..^1].join(" ")
-
-        proc getgame_fen(x: string): Position =
-                ## construct board from FEN command, e.g. from Picochess
-
-                var inv: bool
-                var l: string
-
-                if x.split(" ")[6] == "moves": l = shredder(x) else: l = x
-                let ff = l.split(" ")[2..7]
-                let ff2 = ff.join(" ")
-
-                var b = fromfen(ff2)
-                if " w " in ff2:
+                proc getgame(x: string): Position =
+                        ## construct board from startpos moves command, e.g. from Cute Chess
+                        var b = newgame()
                         side = true
-                        inv = false
-                else:
-                        side = false
-                        inv = true
-
-                if len(l.split(" ")) > 8:
-                        let mm = l.split(" ")[9..^1]
+                        let mm = x.split(' ')[3..^1]
+                        var inv = false
                         for i in mm:
-                                let fr = parse(i[0..1], inv = inv)
-                                let to = parse(i[2..3], inv = inv)
-                                let c = b.move(fr, to)
+                                var fr = parse(i[0..1], inv = inv)
+                                var to = parse(i[2..3], inv = inv)
+                                var c = b.move(fr, to)
                                 side = not side
 
-                                let d = c.rotate()
+                                var d = c.rotate()
                                 b = d
                                 inv = not inv
-                return b
+                        return b
 
-        while true:
-                let l = readLine(stdin)
+                proc shredder(l: string): string =
+                        ## fix Shredder FENs
+                        let x = l.split(" ")
+                        return x[0..5].join(" ") & " 0 1 " & x[6..^1].join(" ")
 
-                if l == "quit":
-                        break
-                if l == "?":
-                        echo b.board
-                if l == "uci":
-                        echo "id name nimTUROCHAMP"
-                        echo "id author Martin C. Doege"
-                        echo fmt"option name maxplies type spin default {MAXPLIES} min 1 max 1024"
-                        echo fmt"option name qplies type spin default {QPLIES} min 1 max 1024"
-                        echo "uciok"
-                if l == "isready":
-                        if b.board == "":
+                proc getgame_fen(x: string): Position =
+                        ## construct board from FEN command, e.g. from Picochess
+
+                        var inv: bool
+                        var l: string
+
+                        if x.split(" ")[6] == "moves": l = shredder(x) else: l = x
+                        let ff = l.split(" ")[2..7]
+                        let ff2 = ff.join(" ")
+
+                        var b = fromfen(ff2)
+                        if " w " in ff2:
+                                side = true
+                                inv = false
+                        else:
+                                side = false
+                                inv = true
+
+                        if len(l.split(" ")) > 8:
+                                let mm = l.split(" ")[9..^1]
+                                for i in mm:
+                                        let fr = parse(i[0..1], inv = inv)
+                                        let to = parse(i[2..3], inv = inv)
+                                        let c = b.move(fr, to)
+                                        side = not side
+
+                                        let d = c.rotate()
+                                        b = d
+                                        inv = not inv
+                        return b
+
+                while true:
+                        let l = readLine(stdin)
+
+                        if l == "quit":
+                                break
+                        if l == "?":
+                                echo b.board
+                        if l == "uci":
+                                echo "id name nimTUROCHAMP"
+                                echo "id author Martin C. Doege"
+                                echo fmt"option name maxplies type spin default {MAXPLIES} min 1 max 1024"
+                                echo fmt"option name qplies type spin default {QPLIES} min 1 max 1024"
+                                echo "uciok"
+                        if l == "isready":
+                                if b.board == "":
+                                        b = newgame()
+                                        side = true
+                                echo "readyok"
+                        if l == "ucinewgame" or l == "position startpos":
                                 b = newgame()
                                 side = true
-                        echo "readyok"
-                if l == "ucinewgame" or l == "position startpos":
-                        b = newgame()
-                        side = true
 
-                if l.startsWith("setoption name maxplies value"):
-                        MAXPLIES = parseInt(l.split()[4])
-                        echo "# maxplies ", MAXPLIES
-                if l.startsWith("setoption name qplies value"):
-                        QPLIES = parseInt(l.split()[4])
-                        echo "# qplies ", QPLIES
+                        if l.startsWith("setoption name maxplies value"):
+                                MAXPLIES = parseInt(l.split()[4])
+                                echo "# maxplies ", MAXPLIES
+                        if l.startsWith("setoption name qplies value"):
+                                QPLIES = parseInt(l.split()[4])
+                                echo "# qplies ", QPLIES
 
-                if l.startsWith("position startpos moves"):
-                        b = l.getgame()
-                if l.startsWith("position fen"):
-                        b = l.getgame_fen()
-                if l.startsWith("go"):
-                        if b.board == "":
-                                b = newgame()
-                                side = true
-                        var m = b.getmove()
-                        if not side:
-                                m = m.mirror()
-                        side = not side
-                        echo "bestmove ", m
+                        if l.startsWith("position startpos moves"):
+                                b = l.getgame()
+                        if l.startsWith("position fen"):
+                                b = l.getgame_fen()
+                        if l.startsWith("go"):
+                                if b.board == "":
+                                        b = newgame()
+                                        side = true
+                                var m = b.getmove()
+                                if not side:
+                                        m = m.mirror()
+                                side = not side
+                                echo "bestmove ", m
 
-when isMainModule:
         main()
 
