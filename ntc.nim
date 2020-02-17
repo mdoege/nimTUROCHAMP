@@ -407,7 +407,8 @@ proc getmove*(b: Position, output = false): string =
         ## get computer move for board position
         NODES = 0
         let start = epochTime()
-        let moves = gen_moves(b)
+        let moves = order(b, 0, gen_moves(b))
+        var tbest = -1e6
         var ll: seq[(float, string, string, int, int, string)]
                 
         for i in 0..len(moves)-1:
@@ -421,8 +422,9 @@ proc getmove*(b: Position, output = false): string =
                 else:
                         if c.wc_w or c.wc_e: castle += 1
                 let d = c.rotate()
-                var (t, pv) = searchmax(d, 2, -1e6, 1e6, c.mirrmv(fr & to))
+                var (t, pv) = searchmax(d, 2, -1e6, -tbest, c.mirrmv(fr & to))
                 t = -t
+                if t > tbest: tbest = t - 0.1
                 if output:
                         echo fr, to, " ", t, " ", c.turing(), " ", pv
                 ll.add((t + (c.turing() + castle) / 1000.0, fr, to, moves[i][0], moves[i][1], pv))
