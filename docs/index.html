@@ -1,189 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>nimTUROCHAMP.js</title>
-<link rel="stylesheet" href="chessboard.css">
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="utf-8">
+  <title>NimTUROCHAMP</title>
+  <link href="chessboard.css" rel="stylesheet">
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-<script src="jquery-3.4.0.min.js"></script>
-<script src="chessboard.js"></script>
-<script src="chess.js"></script>
-<script>
+  <h1 id="thetitle">NimTUROCHAMP is loading&hellip;</h1>
+  <div id="board"></div>
 
-$(document).ready(function() {
-	var myvoice = "";
-	var voices = speechSynthesis.getVoices();
-	/* for Safari we need to pick an English voice explicitly,
-	   otherwise the system default is used */
-	for (i = 0; i < voices.length; i++) {
-		if (voices[i].lang == "en-US") {
-			myvoice = voices[i];
-			break;
-		}
-	}
-	function talk(text) {
-		var msg = new SpeechSynthesisUtterance(text);
-		msg.lang = "en-US";
-		msg.pitch = 1;
-		msg.rate = 1;
-		if (myvoice != "") {
-			msg.voice = myvoice;
-		}
-		window.speechSynthesis.speak(msg);
-	}
-	talk("Hello, welcome to too-row-champ!");
-	talk("How about a nice game of chess.");
-
-	var setfen = function(source, target, piece, newPos, oldPos, orientation) {
-		var ret = 1;
-
-		if ((piece[1] == "K" && source == "e1" && target == "g1") || (piece[1] == "K" && source == "e8" && target == "g8")) {
-			chess.move("O-O");
-			board1.position(chess.fen());
-		} else if ((piece[1] == "K" && source == "e1" && target == "c1") || (piece[1] == "K" && source == "e8" && target == "c8")) {
-			chess.move("O-O-O");
-			board1.position(chess.fen());
-		} else {
-			ret = chess.move(source + target, {sloppy: true});
-		}
-		var fen = chess.fen();
-		if (ret == null) {
-			talk("Illegal move!");
-			talk("Please make a valid move instead!");
-			if (chess.turn() == "w") {
-				talk("It is White's turn.");
-			} else {
-				talk("It is Black's turn.");
-			}
-		} else {
-			fentext.innerHTML = fen;
-			console.log(fen);
-			spgn.innerHTML = chess.pgn();
-
-			getmove();
-		}
-	}
-
-	var board1 = ChessBoard("board1", {
-		draggable: true,
-		onDrop: setfen,
-	});
-	board1.start();
-
-	var worker = new Worker('ntcjs.js');
-
-	var chess = new Chess();
-	$("#moveBtn").on("click", getmove);
-
-	// test position
-/*	var myfen = "7R/1k1p4/7R/4P3/8/8/6K1/R1R5 b - - 0 1";
-	board1.position(myfen);
-	chess.load(myfen);
-	console.log(chess.ascii());	*/
-
-	function getmove() {
-		var fen = chess.fen();
-		
-		worker.postMessage(fen);
-		thetitle.innerHTML = "Calculating&hellip;";
-		$("#moveBtn").prop('disabled', true);
-	}
-
-	function recmove(data) {
-		thetitle.innerHTML = "nimTUROCHAMP";
-		var mymove = "";
-		var moves = chess.moves({ verbose: true });
-		var lastmove = chess.history({ verbose: true });
-		if (lastmove.length > 0) {
-			lastmove = lastmove[lastmove.length - 1];
-			if (lastmove.flags.includes("p") || lastmove.flags.includes("e")) {
-				board1.position(chess.fen());
-			}
-		}
-		for (j = 0; j < moves.length; j++) {
-			if (moves[j].from + moves[j].to == data) {
-				mymove = moves[j];
-			} else if ((moves[j].from + moves[j].to == data.substring(0, 4)) && moves[j].flags.includes("p")) {
-				console.log(moves[j].promotion, data.substring(4, 5));
-				if (moves[j].promotion == data.substring(4, 5)) {
-					mymove = moves[j];
-				}
-			}
-		}
-		if (mymove == "") {
-			console.log(data, "illegal move from engine, user wins");
-			thetitle.innerHTML = "I resign!";
-			talk("I resign!");
-			return;
-		}
-		console.log(mymove.from + "-" + mymove.to);
-		chess.move(mymove);
-		board1.move(mymove.from + "-" + mymove.to);
-
-		if ((mymove.from == "e1" && mymove.to == "g1") || (mymove.from == "e8" && mymove.to == "g8")) {
-			board1.position(chess.fen());
-		} else if ((mymove.from == "e1" && mymove.to == "c1") || (mymove.from == "e8" && mymove.to == "c8")) {
-			board1.position(chess.fen());
-		}
-		if (mymove.flags.includes("p") || mymove.flags.includes("e")) {
-			board1.position(chess.fen());
-		}
-		var fen = chess.fen();
-		fentext.innerHTML = fen;
-		console.log(fen);
-		spgn.innerHTML = chess.pgn();
-		$("#moveBtn").prop('disabled', false);
-
-		var pnames = {
-			"p": "pawn",
-			"n": "knight",
-			"b": "bishop",
-			"r": "rook",
-			"q": "queen",
-			"k": "king",
-		};
-		talk(pnames[mymove.piece] + " from " + mymove.from + " to " + mymove.to + ".");
-		if (chess.turn() == "w") {
-			var sidm = "Black";
-		} else {
-			var sidm = "White";
-		}
-		if (mymove.flags.includes("e")) {
-			talk("Pawn takes pawn.");
-		} else if (mymove.flags.includes("c")) {
-			talk(pnames[mymove.piece] + " takes " + pnames[mymove.captured] + ".");
-		} else if (mymove.flags.includes("k")) {
-			talk(sidm + " castles kingside.");
-		} else if (mymove.flags.includes("q")) {
-			talk(sidm + " castles queenside.");
-		}
-
-		if (chess.in_checkmate()) {
-			talk("Checkmate!");
-		} else if (chess.in_check()) {
-			talk("Check!");
-		}
-	}
-
-	worker.addEventListener('message', function(e) {
-		recmove(e.data);
-	}, false);
-
-
-});
-</script>
-<h1 id="thetitle">nimTUROCHAMP</h1>
-<div id="fentext">none</div>
-<table><tr>
-<td><div id="board1" style="width: 450px"></div></td>
-<td valign="top">
-</td>
-<td><div id="spgn">none</div></td>
-</tr></table>
-<br>
-<input type="button" id="moveBtn" value="Play computer move for current side">
+  <script src="chess.js"></script>
+  <script src="chessboard.js"></script>
+  <script src="app.js"></script>
+  <p><div id="spgn"></div></p>
+  <p>(Reload page to start a new game.)</p>
 </body>
 </html>
 
