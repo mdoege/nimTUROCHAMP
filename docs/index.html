@@ -39,10 +39,10 @@ $(document).ready(function() {
 	var setfen = function(source, target, piece, newPos, oldPos, orientation) {
 		var ret = 1;
 
-		if ((source == "e1" && target == "g1") || (source == "e8" && target == "g8")) {
+		if ((piece[1] == "K" && source == "e1" && target == "g1") || (piece[1] == "K" && source == "e8" && target == "g8")) {
 			chess.move("O-O");
 			board1.position(chess.fen());
-		} else if ((source == "e1" && target == "c1") || (source == "e8" && target == "c8")) {
+		} else if ((piece[1] == "K" && source == "e1" && target == "c1") || (piece[1] == "K" && source == "e8" && target == "c8")) {
 			chess.move("O-O-O");
 			board1.position(chess.fen());
 		} else {
