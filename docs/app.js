@@ -12,6 +12,28 @@ var board = new ChessBoard('board', {
 });
 var worker = new Worker('ntcjs.js');
 
+var myvoice = "";
+var voices = speechSynthesis.getVoices();
+/* for Safari we need to pick an English voice explicitly,
+   otherwise the system default is used */
+for (i = 0; i < voices.length; i++) {
+	if (voices[i].lang == "en-US") {
+		myvoice = voices[i];
+		break;
+	}
+}
+
+function talk(text) {
+	var msg = new SpeechSynthesisUtterance(text);
+	msg.lang = "en-US";
+	msg.pitch = 1;
+	msg.rate = 1;
+	if (myvoice != "") {
+		msg.voice = myvoice;
+	}
+	window.speechSynthesis.speak(msg);
+}
+
 function onSquareClick(clickedSquare, selectedSquares) {
   if (selectedSquares.length === 0) {
     if (game.moves({ square: clickedSquare }).length > 0) {
@@ -91,17 +113,49 @@ function getmove(data) {
 	if (mymove == "") {
 		console.log(data, "illegal move from engine, user wins");
 		thetitle.innerHTML = "resigns!";
+		talk("I resign!");
 		return;
 	}
 	game.move(mymove);
 	spgn.innerHTML = game.pgn();
   board.setPosition(game.fen());
 
+	var pnames = {
+		"p": "pawn",
+		"n": "knight",
+		"b": "bishop",
+		"r": "rook",
+		"q": "queen",
+		"k": "king",
+	};
+	talk(pnames[mymove.piece] + " from " + mymove.from + " to " + mymove.to + ".");
+	if (game.turn() == "w") {
+		var sidm = "Black";
+	} else {
+		var sidm = "White";
+	}
+	if (mymove.flags.includes("e")) {
+		talk("Pawn takes pawn.");
+	} else if (mymove.flags.includes("c")) {
+		talk(pnames[mymove.piece] + " takes " + pnames[mymove.captured] + ".");
+	} else if (mymove.flags.includes("k")) {
+		talk(sidm + " castles kingside.");
+	} else if (mymove.flags.includes("q")) {
+		talk(sidm + " castles queenside.");
+	}
+
+	if (game.in_checkmate()) {
+		talk("Checkmate!");
+	} else if (game.in_check()) {
+		talk("Check!");
+	}
+
   if (game.game_over()) {
     if (game.in_checkmate()) {
-      alert('You ' + (game.turn() === 'w' ? 'lost' : 'won'));
+      var myres = 'You have ' + (game.turn() === 'w' ? 'lost' : 'won') + ' the game!';
+      talk(myres);
     } else {
-      alert('It\'s a draw');
+      talk('The game is a draw.');
     }
   }
   thetitle.innerHTML = "ready";
