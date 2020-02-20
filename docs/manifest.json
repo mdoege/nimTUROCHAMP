@@ -1,0 +1,15 @@
+{
+  "short_name": "Turochamp",
+  "name": "NimTUROCHAMP",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#ffffff",
+  "display": "minimal-ui"
+}
+
