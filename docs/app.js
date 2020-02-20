@@ -71,7 +71,7 @@ function move(from, to, promotionShortPiece) {
 function TUROMove() {
   var fen = game.fen();
   worker.postMessage(fen);
-  thetitle.innerHTML = "NimTUROCHAMP is thinking&hellip;";
+  thetitle.innerHTML = "is thinking&hellip;";
 }
 
 function getmove(data) {
@@ -90,7 +90,7 @@ function getmove(data) {
 	}
 	if (mymove == "") {
 		console.log(data, "illegal move from engine, user wins");
-		thetitle.innerHTML = "NimTUROCHAMP resigns!";
+		thetitle.innerHTML = "resigns!";
 		return;
 	}
 	game.move(mymove);
@@ -104,12 +104,12 @@ function getmove(data) {
       alert('It\'s a draw');
     }
   }
-  thetitle.innerHTML = "NimTUROCHAMP ready";
+  thetitle.innerHTML = "ready";
 }
 
 worker.addEventListener('message', function(e) {
 	getmove(e.data);
 }, false);
 
-thetitle.innerHTML = "NimTUROCHAMP ready";
+thetitle.innerHTML = "ready";
 
