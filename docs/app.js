@@ -1,3 +1,11 @@
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/nimTUROCHAMP/sw.js').then(function(reg) {
+    console.log('serviceWorker success: ' + reg.scope);
+  }).catch(function(error) {
+    console.log('serviceWorker error: ' + error);
+  });
+};
+
 var game = new Chess();
 var board = new ChessBoard('board', {
   onSquareClick: onSquareClick
