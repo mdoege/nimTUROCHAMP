@@ -5,6 +5,14 @@ this.addEventListener('install', function(event) {
     caches.open(MYCACHE).then(function(cache) {
       return cache.addAll([
         '/nimTUROCHAMP/',
+        '/nimTUROCHAMP/app.js',
+        '/nimTUROCHAMP/chess.js',
+        '/nimTUROCHAMP/chessboard.css',
+        '/nimTUROCHAMP/chessboard.js',
+        '/nimTUROCHAMP/chesspieces.png',
+        '/nimTUROCHAMP/fav192.png',
+        '/nimTUROCHAMP/fav512.png',
+        '/nimTUROCHAMP/favicon.png',
         '/nimTUROCHAMP/index.html',
         '/nimTUROCHAMP/ntcjs.js',
       ]);
