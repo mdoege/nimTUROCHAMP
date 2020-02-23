@@ -19,12 +19,20 @@
   <h2 id="thetitle">is loading&hellip;</h2>
   <div id="board"></div>
 
+  <br>
+  <div style="width: 80vw">
+    <details>
+      <summary><b>Options</b></summary>
+      <p>FEN:<br><span id="thefen">rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</span></p>
+      <input type="button" id="moveBtn" value="Play computer move for current side" onclick="TUROMove();"><br>&nbsp;<br>
+      <input type="button" id="startBtn" value="Start new game" onclick="newgame();">
+    </details>
+  </div>
+  <p><div id="spgn"></div></p>
+  <div align="right"><small>v6</small></div>
   <script src="chess.js"></script>
   <script src="chessboard.js"></script>
   <script src="app.js"></script>
-  <p><div id="spgn"></div></p>
-  <p>(Reload page to start a new game.)</p>
-  <div align="right"><small>v5</small></div>
 </body>
 </html>
 

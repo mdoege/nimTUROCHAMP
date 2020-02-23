@@ -7,9 +7,6 @@ if ('serviceWorker' in navigator) {
 };
 
 var game = new Chess();
-var board = new ChessBoard('board', {
-  onSquareClick: onSquareClick
-});
 var worker = new Worker('ntcjs.js');
 
 var myvoice = "";
@@ -87,6 +84,8 @@ function move(from, to, promotionShortPiece) {
 
   board.setPosition(game.fen());
   spgn.innerHTML = game.pgn();
+  thefen.innerHTML = game.fen();
+  localStorage.setItem("fen", game.fen());
   TUROMove();
 }
 
@@ -118,7 +117,9 @@ function getmove(data) {
 	}
 	game.move(mymove);
 	spgn.innerHTML = game.pgn();
+  thefen.innerHTML = game.fen();
   board.setPosition(game.fen());
+  localStorage.setItem("fen", game.fen());
 
 	var pnames = {
 		"p": "pawn",
@@ -161,9 +162,33 @@ function getmove(data) {
   thetitle.innerHTML = "ready";
 }
 
+function newgame(){
+	game = new Chess();
+	spgn.innerHTML = game.pgn();
+  thefen.innerHTML = game.fen();
+  board.setPosition(game.fen());
+  localStorage.setItem("fen", game.fen());
+}
+
 worker.addEventListener('message', function(e) {
 	getmove(e.data);
 }, false);
 
+// restore saved game if available
+var storedfen = localStorage.getItem("fen");
+if (storedfen != null) {
+	game = new Chess(storedfen);
+	spgn.innerHTML = game.pgn();
+  thefen.innerHTML = game.fen();
+  board = new ChessBoard('board', {
+    fen: storedfen,
+    onSquareClick: onSquareClick
+  });
+} else {
+  var board = new ChessBoard('board', {
+    onSquareClick: onSquareClick
+  });
+
+}
 thetitle.innerHTML = "ready";
 
