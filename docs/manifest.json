@@ -20,6 +20,7 @@
   ],
   "start_url": ".",
   "background_color": "#ffffff",
+  "theme_color": "#5b928d",
   "display": "minimal-ui"
 }
 
