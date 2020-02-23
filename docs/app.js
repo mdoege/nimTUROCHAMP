@@ -153,7 +153,7 @@ function getmove(data) {
 
   if (game.game_over()) {
     if (game.in_checkmate()) {
-      var myres = 'You have ' + (game.turn() === 'w' ? 'lost' : 'won') + ' the game!';
+      var myres = (game.turn() === 'w' ? 'Black' : 'White') + ' has won the game!';
       talk(myres);
     } else {
       talk('The game is a draw.');
