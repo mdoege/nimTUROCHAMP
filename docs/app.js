@@ -10,25 +10,29 @@ var game = new Chess();
 var worker = new Worker('ntcjs.js');
 
 var myvoice = "";
-var voices = speechSynthesis.getVoices();
-/* for Safari we need to pick an English voice explicitly,
-   otherwise the system default is used */
-for (i = 0; i < voices.length; i++) {
-	if (voices[i].lang == "en-US") {
-		myvoice = voices[i];
-		break;
-	}
+if ('speechSynthesis' in window) {
+  var voices = speechSynthesis.getVoices();
+  /* for Safari we need to pick an English voice explicitly,
+     otherwise the system default is used */
+  for (i = 0; i < voices.length; i++) {
+	  if (voices[i].lang == "en-US") {
+		  myvoice = voices[i];
+		  break;
+	  }
+  }
 }
 
 function talk(text) {
-	var msg = new SpeechSynthesisUtterance(text);
-	msg.lang = "en-US";
-	msg.pitch = 1;
-	msg.rate = 1;
-	if (myvoice != "") {
-		msg.voice = myvoice;
-	}
-	window.speechSynthesis.speak(msg);
+  if ('speechSynthesis' in window) {
+	  var msg = new SpeechSynthesisUtterance(text);
+	  msg.lang = "en-US";
+	  msg.pitch = 1;
+	  msg.rate = 1;
+	  if (myvoice != "") {
+		  msg.voice = myvoice;
+	  }
+	  window.speechSynthesis.speak(msg);
+  }
 }
 
 function onSquareClick(clickedSquare, selectedSquares) {
