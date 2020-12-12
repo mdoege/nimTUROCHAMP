@@ -140,7 +140,7 @@ proc fromfen*(fen: string): Position =
                 pos = pos.rotate()
         return pos
 
-proc gen_moves*(s: Position): seq[(int, int)] =
+proc gen_moves_no_castle*(s: Position): seq[(int, int)] =
         ## generate all pseudo-legal moves in a position
         for i in 0..119:
                 let p = s.board[i]
@@ -168,9 +168,61 @@ proc gen_moves*(s: Position): seq[(int, int)] =
                                 if p == 'P' or p == 'N' or p == 'K' or
                                                 q.isLowerAscii():
                                         break
-                                if i == A1 and s.board[j+E] == 'K' and s.wc_w:
+                                j = j + d
+
+proc attacks*(pos: Position, x: int): seq[int] =
+        ## return attacked empty and enemy squares
+        let moves = pos.gen_moves_no_castle()
+        for n in 0..len(moves)-1:
+                let i = moves[n][0]
+                let j = moves[n][1]
+                if i == x:
+                        result.add(j)
+
+proc ischeck(s: Position): bool =
+        ## is the King in check?
+        var check = false
+        for i in 0..119:
+                let p = s.board[i]
+                if not p.isUpperAscii(): continue
+
+                let a = s.attacks(i)
+                for j in a:
+                        if s.board[j] == 'k': check = true
+        return check
+
+proc gen_moves*(s: Position): seq[(int, int)] =
+        ## generate all pseudo-legal moves in a position
+        let check = ischeck(rotate(s))
+        for i in 0..119:
+                let p = s.board[i]
+                if not p.isUpperAscii():
+                        continue
+                #echo i, " ", render(i)
+                for d in dirs[p]:
+                        if d == 0:
+                                break
+                        var j = i + d
+                        while true:
+                                #echo render(j)
+                                let q = s.board[j]
+                                if q.isSpaceAscii() or q.isUpperAscii():
+                                        break
+                                if p == 'P' and d in [N, N+N] and q != '.':
+                                        break
+                                if p == 'P' and d == N+N and (i < A1+N or
+                                                s.board[i+N] != '.'):
+                                        break
+                                if p == 'P' and d in [N+W, N+E] and q == '.' and
+                                                not (j in [s.ep, s.kp, s.kp-1, s.kp+1]):
+                                        break
+                                result.add((i, j))
+                                if p == 'P' or p == 'N' or p == 'K' or
+                                                q.isLowerAscii():
+                                        break
+                                if i == A1 and s.board[j+E] == 'K' and s.wc_w and not check:
                                         result.add((j+E, j+W))
-                                if i == H1 and s.board[j+W] == 'K' and s.wc_e:
+                                if i == H1 and s.board[j+W] == 'K' and s.wc_e and not check:
                                         result.add((j+W, j+E))
                                 j = j + d
 
@@ -254,15 +306,6 @@ proc mirrmv(pos: Position, x: string): string =
                 return x.mirror
         else:
                 return x
-
-proc attacks*(pos: Position, x: int): seq[int] =
-        ## return attacked empty and enemy squares
-        let moves = pos.gen_moves()
-        for n in 0..len(moves)-1:
-                let i = moves[n][0]
-                let j = moves[n][1]
-                if i == x:
-                        result.add(j)
 
 proc defenders*(pos: Position, x: int): seq[int] =
         ## get list of defenders for a square
