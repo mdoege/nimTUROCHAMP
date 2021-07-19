@@ -191,9 +191,11 @@ proc ischeck(s: Position): bool =
                         if s.board[j] == 'k': check = true
         return check
 
-proc gen_moves*(s: Position): seq[(int, int)] =
+proc gen_moves*(s: Position, test_check: bool = false): seq[(int, int)] =
         ## generate all pseudo-legal moves in a position
-        let check = ischeck(rotate(s))
+        var check = false
+        if test_check:
+                check = ischeck(rotate(s))
         for i in 0..119:
                 let p = s.board[i]
                 if not p.isUpperAscii():
@@ -450,7 +452,7 @@ proc getmove*(b: Position, output = false): string =
         ## get computer move for board position
         NODES = 0
         let start = epochTime()
-        let moves = order(b, 0, gen_moves(b))
+        let moves = order(b, 0, gen_moves(b, true))
         var tbest = -1e6
         var ll: seq[(float, string, string, int, int, string)]
                 
