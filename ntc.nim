@@ -134,14 +134,14 @@ proc fromfen*(fen: string): Position =
                 ep = parse(enpas)
 
         var pos = Position(board: b, score: 0, wc_w: cas.contains('Q'), wc_e: cas.contains('K'),
-                        bc_w: cas.contains('K'), bc_e: cas.contains('Q'), ep: ep, kp: 0)
+                        bc_w: cas.contains('k'), bc_e: cas.contains('q'), ep: ep, kp: 0)
 
         if fen.split(" ")[1] == "b":
                 pos = pos.rotate()
         return pos
 
 proc gen_moves_no_castle*(s: Position): seq[(int, int)] =
-        ## generate all pseudo-legal moves in a position
+        ## generate all pseudo-legal moves in a position (except castling)
         for i in 0..119:
                 let p = s.board[i]
                 if not p.isUpperAscii():
@@ -179,9 +179,12 @@ proc attacks*(pos: Position, x: int): seq[int] =
                 if i == x:
                         result.add(j)
 
-proc ischeck(s: Position): bool =
-        ## is the King in check?
-        var check = false
+proc ischeck(s: Position): (bool, bool, bool) =
+        ## is the King in check? is castling allowed?
+        var
+                check = false
+                wcastle = true
+                ecastle = true
         for i in 0..119:
                 let p = s.board[i]
                 if not p.isUpperAscii(): continue
@@ -189,13 +192,20 @@ proc ischeck(s: Position): bool =
                 let a = s.attacks(i)
                 for j in a:
                         if s.board[j] == 'k': check = true
-        return check
+                        if j == A8 + 2 or j == A8 + 3:
+                                ecastle = false
+                        if j == A8 + 5 or j == A8 + 6:
+                                wcastle = false
+        return (check, wcastle, ecastle)
 
 proc gen_moves*(s: Position, test_check: bool = false): seq[(int, int)] =
         ## generate all pseudo-legal moves in a position
-        var check = false
+        var
+                check = false
+                wcastle = true
+                ecastle = true
         if test_check:
-                check = ischeck(rotate(s))
+                (check, wcastle, ecastle) = ischeck(rotate(s))
         for i in 0..119:
                 let p = s.board[i]
                 if not p.isUpperAscii():
@@ -222,9 +232,9 @@ proc gen_moves*(s: Position, test_check: bool = false): seq[(int, int)] =
                                 if p == 'P' or p == 'N' or p == 'K' or
                                                 q.isLowerAscii():
                                         break
-                                if i == A1 and s.board[j+E] == 'K' and s.wc_w and not check:
+                                if i == A1 and s.board[j+E] == 'K' and s.wc_w and wcastle and not check:
                                         result.add((j+E, j+W))
-                                if i == H1 and s.board[j+W] == 'K' and s.wc_e and not check:
+                                if i == H1 and s.board[j+W] == 'K' and s.wc_e and ecastle and not check:
                                         result.add((j+W, j+E))
                                 j = j + d
 
