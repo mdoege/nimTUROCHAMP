@@ -185,6 +185,11 @@ proc ischeck(s: Position): (bool, bool, bool) =
                 check = false
                 wcastle = true
                 ecastle = true
+                kpos = -1
+        for i in 0..119:
+                if s.board[i] == 'k':
+                        kpos = i
+
         for i in 0..119:
                 let p = s.board[i]
                 if not p.isUpperAscii(): continue
@@ -192,13 +197,13 @@ proc ischeck(s: Position): (bool, bool, bool) =
                 let a = s.attacks(i)
                 for j in a:
                         if s.board[j] == 'k': check = true
-                        if j == A8 + 2 or j == A8 + 3:
+                        if j == kpos - 2 or j == kpos - 1:
                                 ecastle = false
-                        if j == A8 + 5 or j == A8 + 6:
+                        if j == kpos + 1 or j == kpos + 2:
                                 wcastle = false
         return (check, wcastle, ecastle)
 
-proc gen_moves*(s: Position, test_check: bool = false): seq[(int, int)] =
+proc gen_moves*(s: Position, test_check = false): seq[(int, int)] =
         ## generate all pseudo-legal moves in a position
         var
                 check = false
@@ -206,6 +211,7 @@ proc gen_moves*(s: Position, test_check: bool = false): seq[(int, int)] =
                 ecastle = true
         if test_check:
                 (check, wcastle, ecastle) = ischeck(rotate(s))
+                #echo (check, wcastle, ecastle)
         for i in 0..119:
                 let p = s.board[i]
                 if not p.isUpperAscii():
