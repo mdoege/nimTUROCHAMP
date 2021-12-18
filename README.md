@@ -8,7 +8,7 @@ Here is a [web browser-based demo](https://mdoege.github.io/nimTUROCHAMP/) of ni
 
 ## Compilation
 
- nim c -d:release --passC:"-flto" ntc
+    nim c -d:release --passC:"-flto" ntc
 
 ## UCI parameters
 
