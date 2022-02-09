@@ -8,7 +8,9 @@ Here is a [web browser-based demo](https://mdoege.github.io/nimTUROCHAMP/) of ni
 
 ## Compilation
 
-    nim c -d:release --passC:"-flto" ntc
+    nim c -d:danger --passC:"-flto" ntc
+
+These recommended compilation switches produce a faster engine binary by disabling Nim runtime checks and enabling link-time optimization, respectively.
 
 ## UCI parameters
 
