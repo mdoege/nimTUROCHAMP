@@ -265,7 +265,13 @@ function getmove(data) {
   thefen.innerHTML = game.fen();
   board.setPosition(game.fen());
   console.log("material balance", calculateMaterialValue(game.fen()));
-  comment.innerHTML = getQuip(calculateMaterialValue(game.fen()), game.turn());
+  new_quip = getQuip(calculateMaterialValue(game.fen()), game.turn());
+  comment.innerHTML = new_quip;
+  if (new_quip[0] == "(") {
+    balloon.innerHTML = "💭";
+  } else {
+    balloon.innerHTML = "💬";
+  }
   localStorage.setItem("fen", game.fen());
 
   var pnames = {
@@ -313,7 +319,8 @@ function newgame(){
   game = new Chess();
   spgn.innerHTML = game.pgn();
   thefen.innerHTML = game.fen();
-  comment.innerHTML = "Care for another game?"
+  comment.innerHTML = "Care for another game?";
+  balloon.innerHTML = "💬";
   board.setPosition(game.fen());
   localStorage.setItem("fen", game.fen());
 }
