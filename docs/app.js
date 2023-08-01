@@ -99,6 +99,147 @@ function TUROMove() {
   thetitle.innerHTML = "is thinking&hellip;";
 }
 
+// code by phind.com / GPT-4
+function calculateMaterialValue(fen) {
+  const pieceValues = {
+    'P': 1, // Pawn
+    'N': 3, // Knight
+    'B': 3.5, // Bishop
+    'R': 5, // Rook
+    'Q': 10, // Queen
+    'K': 1000, // King
+    'p': -1, // Pawn
+    'n': -3, // Knight
+    'b': -3.5, // Bishop
+    'r': -5, // Rook
+    'q': -10, // Queen
+    'k': -1000, // King
+  };
+
+  let totalValue = 0;
+  const fenParts = fen.split(' ');
+
+  // Extract the piece placement part from the FEN string
+  const piecePlacement = fenParts[0];
+
+  // Iterate over each character in the piece placement part
+  for (let i = 0; i < piecePlacement.length; i++) {
+    const piece = piecePlacement[i];
+
+    // Check if the character represents a piece
+    if (piece in pieceValues) {
+      // Add the value of the piece to the total
+      totalValue += pieceValues[piece];
+    }
+  }
+
+  return totalValue;
+}
+
+// code and many funny quips by phind.com / GPT-4
+function getQuip(evaluation, side) {
+  const genericQuips = [
+    "Interesting position!",
+    "Oh, is it my turn yet?",
+    "Wait a second, let me get another cup of tea.",
+    "Well, it looks like neither one of us understands this position!",
+    "I'm as confused by these chess rules as a don by a digital watch.",
+    "I've seen faster moves in a game of cricket!",
+    "I've seen more strategy in a game of tic-tac-toe!",
+    "I've seen more preparation in a hastily made cup of tea!",
+    "I've seen more chess knowledge in a beginner's chess club!",
+    "I've seen more opening knowledge in a game of checkers!",
+    "I've seen more tactical acumen in a game of snakes and ladders!",
+    "I've seen more positional understanding in a game of hopscotch!",
+    "I've seen more decisive moves in a game of musical chairs!",
+    "(I hope I remembered to lock the front door.)",
+    "(Did I leave the oven on? I can almost smell the burnt toast.)",
+    "(I must really remember to prepare for tomorrow's lecture.)",
+    "(I wonder what my students are up to right now.)",
+    "(I could really use a cup of tea right now.)",
+    "(I hope my housekeeper remembered to buy more tea.)",
+    "(I wonder if it's going to rain today.)",
+    "(I should probably start grading those term papers.)",
+    "(I wonder if I should ring my housekeeper for some nice tea.)",
+  ];
+
+  const winningQuips = [
+    "Nice move!",
+    "Well played!",
+    "You're really crushing it!",
+    "You're on fire today!",
+    "Amazing play!",
+    "Looks like somebody has read a few chess books!",
+    "You're unbeatable today!",
+    "How about we call it a draw? No?",
+    "This position looks messier than my desk.",
+    "Guess I should have put less effort into breaking codes and more into learning chess!",
+    "Well, well… Cracking the Enigma was a lot easier, that much is certain!",
+    "I feel like I'm in a sandwich, and you're the bread.",
+    "I'd rather be sipping tea than playing this position.",
+    "I'm as tangled as a messy knot in this game!",
+    "I suppose I'm a little absent-minded today.",
+    "I don't always play this badly!",
+    "I say, you really are sneakier than John von Neumann!",
+    "Chess is not really my game.",
+    "How about we play some cricket instead?",
+    "That does not look very promising for me.",
+  ];
+
+  const losingQuips = [
+    "Your position looks murkier than the Thames!",
+    "It's no use!",
+    "No, that did not work either.",
+    "It doesn't look so good for you.",
+    "You are going to get blitzed now!",
+    "And here comes my clever attack!",
+    "Now you are scared, aren't you?",
+    "Come on! Even my Manchester Mark 1 can play better than that!",
+    "Well that was not such a good move, was it.",
+    "I could solve the Enigma, you believe this game would be a challenge?",
+    "Oh! This victory is almost as refreshing as a cup of English tea!",
+    "This game is going smoother than a cricket pitch on a summer's day.",
+    "I'm afraid your King is in more trouble than a sandwich at a cricket match.",
+    "Chess is like a mathematical puzzle, and I'm the master puzzler!",
+  ];
+
+  const undecidedQuips = [
+    "It's a close game.",
+    "The outcome seems uncertain.",
+    "Anything can happen now!",
+    "Tension is in the air!",
+    "Well, that looks drawish to me!",
+    "Your play is more mysterious than Bletchley Park!",
+    "This position is very enigmatic. Like Enigma, you know.",
+    "This game is less decidable than the Entscheidungsproblem.",
+    "This position has more enigmatic variations than Edward Elgar!",
+    "Seems we're stalemated, like two grandmasters, or like my Manchester Mark 1 when I forgot to plug it in.",
+    "Is it just me, or is this game starting to look as complicated as artificial intelligence?",
+    "This game is as unpredictable as the English weather.",
+    "This game is as balanced as a good cup of tea.",
+    "I'm in a bit of a pickle, like a crumpet stuck in the toaster!",
+    "I'm as undecided as a don trying to choose between tea and coffee.",
+    "This game is like a mathematical equation with multiple solutions.",
+    "I'm as rumpled as a crumpled piece of paper in this game.",
+    "I'm as English as a rainy day, but this game has me in a fog.",
+    "The outcome is foggier than Phileas Fogg!",
+  ];
+  if (side == "b") {
+    evaluation = -evaluation;
+  }
+  if (Math.random() > .5) {
+    return genericQuips[Math.floor(Math.random() * genericQuips.length)];
+  }
+
+  if (evaluation > 1) {
+    return winningQuips[Math.floor(Math.random() * winningQuips.length)];
+  } else if (evaluation < -1) {
+    return losingQuips[Math.floor(Math.random() * losingQuips.length)];
+  } else {
+    return undecidedQuips[Math.floor(Math.random() * undecidedQuips.length)];
+  }
+}
+
 function getmove(data) {
   var moves = game.moves({ verbose: true });
   var mymove = "";
@@ -123,6 +264,8 @@ function getmove(data) {
   spgn.innerHTML = game.pgn();
   thefen.innerHTML = game.fen();
   board.setPosition(game.fen());
+  console.log("material balance", calculateMaterialValue(game.fen()));
+  comment.innerHTML = getQuip(calculateMaterialValue(game.fen()), game.turn());
   localStorage.setItem("fen", game.fen());
 
   var pnames = {
@@ -170,6 +313,7 @@ function newgame(){
   game = new Chess();
   spgn.innerHTML = game.pgn();
   thefen.innerHTML = game.fen();
+  comment.innerHTML = "Care for another game?"
   board.setPosition(game.fen());
   localStorage.setItem("fen", game.fen());
 }
