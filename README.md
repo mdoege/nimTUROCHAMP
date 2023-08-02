@@ -19,6 +19,8 @@ These recommended compilation switches produce a faster engine binary by disabli
 
 (At the default of MAXPLIES = 2 and QPLIES = 8, there are two brute-force plies and up to six selective plies.)
 
+If you are using the native NTC binary with a GUI chess frontend, make sure that the GUI considers an illegal engine move a resignation, i.e. the GUI should adjudicate a win for the other player in that case. The web app does this automatically.
+
 ## License
 
 [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
