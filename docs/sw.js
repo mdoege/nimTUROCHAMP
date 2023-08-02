@@ -1,4 +1,4 @@
-MYCACHE = 'v9';
+MYCACHE = 'v10';
 
 this.addEventListener('install', function(event) {
   event.waitUntil(
@@ -15,6 +15,7 @@ this.addEventListener('install', function(event) {
         '/nimTUROCHAMP/favicon.png',
         '/nimTUROCHAMP/index.html',
         '/nimTUROCHAMP/ntcjs.js',
+        '/nimTUROCHAMP/turing.png',
       ]);
     })
   );
