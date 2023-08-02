@@ -152,6 +152,22 @@ function getQuip(evaluation, side) {
     "I've seen more tactical acumen in a game of snakes and ladders!",
     "I've seen more positional understanding in a game of hopscotch!",
     "I've seen more decisive moves in a game of musical chairs!",
+    "I've seen better Knight moves at the Queen's birthday parade!",
+    "I've seen a more active Bishop at a funeral service!",
+    "I've seen more resourceful Queens at the Harrods food counter!",
+    "I've seen better chess thinking at a bridge tournament!",
+    "Your chess is worse than a cucumber sandwich made by my housekeeper!",
+    "Your chess skills are like Tarzan trying to write a novel!",
+    "Your play is more depressing than reading obituaries in The Times!",
+    "Your moves are less accurate than Big Ben when it's stopped for repairs!",
+    "Your brain is like Buckingham Palace: large and mostly empty!",
+    "Your moves are as timely as yesterday's newspaper!",
+    "Your chess is like a strawberry sherbet without strawberries!",
+    "Your chess is like an omelette without eggs!",
+    "Your chess is like a ham sandwich without ham!",
+    "Let me grab a toffee and think about this…",
+    "It would take Miss Marple to find a killer move for you!",
+    "Only Hercule Poirot could solve this difficult case!",
     "(I hope I remembered to lock the front door.)",
     "(Did I leave the oven on? I can almost smell the burnt toast.)",
     "(I must really remember to prepare for tomorrow's lecture.)",
@@ -196,6 +212,7 @@ function getQuip(evaluation, side) {
     "Now you are scared, aren't you?",
     "Come on! Even my Manchester Mark 1 can play better than that!",
     "Well that was not such a good move, was it.",
+    "Maybe you could call H. G. Wells and loan his time machine?",
     "I could solve the Enigma, you believe this game would be a challenge?",
     "Oh! This victory is almost as refreshing as a cup of English tea!",
     "This game is going smoother than a cricket pitch on a summer's day.",
@@ -265,12 +282,14 @@ function getmove(data) {
   thefen.innerHTML = game.fen();
   board.setPosition(game.fen());
   console.log("material balance", calculateMaterialValue(game.fen()));
-  new_quip = getQuip(calculateMaterialValue(game.fen()), game.turn());
+  let new_quip = getQuip(calculateMaterialValue(game.fen()), game.turn());
   comment.innerHTML = new_quip;
   if (new_quip[0] == "(") {
     balloon.innerHTML = "💭";
+    theverb.innerHTML = "thinks";
   } else {
     balloon.innerHTML = "💬";
+    theverb.innerHTML = "says";
   }
   localStorage.setItem("fen", game.fen());
 
@@ -321,6 +340,7 @@ function newgame(){
   thefen.innerHTML = game.fen();
   comment.innerHTML = "Care for another game?";
   balloon.innerHTML = "💬";
+  theverb.innerHTML = "says";
   board.setPosition(game.fen());
   localStorage.setItem("fen", game.fen());
 }

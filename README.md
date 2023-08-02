@@ -4,7 +4,7 @@
 
 A TUROCHAMP implementation in [Nim](https://nim-lang.org/) which uses the [Sunfish](https://github.com/thomasahle/sunfish) move generator and works as an UCI binary. Based on the [pyturochamp.py](https://github.com/mdoege/PyTuroChamp) code.
 
-Here is a [web browser-based demo](https://mdoege.github.io/nimTUROCHAMP/) of nimTUROCHAMP built with "nim js".
+Here is a [web browser-based demo](https://mdoege.github.io/nimTUROCHAMP/) of nimTUROCHAMP built with "nim js", with the man himself dishing out some timeless chess advice. (Warning: working sense of humor required!)
 
 ## Compilation
 
