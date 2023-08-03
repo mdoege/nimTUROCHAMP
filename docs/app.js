@@ -216,6 +216,7 @@ function getQuip(evaluation, side) {
     "You are spinning in circles like the London Eye!",
     "Your play is as graceful as a giraffe at a tea party!",
     "Your play is more boring than a Henry James novel!",
+    "This game is more clichéd than an episode of Downton Abbey!",
     "This game is as predictable as a sunny summer day in Cambridge.",
     "This game is more intricate than an Enigma machine!",
     "Let me grab a toffee and think about this…",
