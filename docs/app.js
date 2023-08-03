@@ -374,8 +374,10 @@ function getmove(data) {
   board.setPosition(game.fen());
   console.log("material balance", calculateMaterialValue(game.fen()));
   let new_quip = getQuip(calculateMaterialValue(game.fen()), game.turn());
-  comment.innerHTML = "";
-  typeTextIntoDiv(new_quip, 'comment');
+  if (new_quip != comment.innerHTML) {
+    comment.innerHTML = "";
+    typeTextIntoDiv(new_quip, 'comment');
+  }
   if (new_quip[0] == "(") {
     balloon.innerHTML = "💭";
     theverb.innerHTML = "thinks";
