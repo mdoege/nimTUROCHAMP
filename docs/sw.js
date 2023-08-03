@@ -1,4 +1,4 @@
-MYCACHE = 'v11';
+MYCACHE = 'v12';
 
 this.addEventListener('install', function(event) {
   event.waitUntil(
