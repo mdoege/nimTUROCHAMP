@@ -266,6 +266,18 @@ window.ChessBoard = function(boardId, config) {
     selectedSquares.push(square);
   };
 
+  this.lightSquare = function(square) {
+    var boardSquare = getBoardSquare(square);
+
+    boardSquare.element.classList.add('lit');
+  };
+
+  this.unlightSquare = function(square) {
+    var boardSquare = getBoardSquare(square);
+
+    boardSquare.element.classList.remove('lit');
+  };
+
   this.unselectSquare = function(square) {
     var index = selectedSquares.indexOf(square);
 
@@ -349,6 +361,7 @@ window.ChessBoard = function(boardId, config) {
       for (var c = 0; c < 8; c++) {
         var square = calcSquare(8 - r, c);
 
+        this.unlightSquare(square);
         if (rows[r][c] === '.') {
           clearSquare(square);
         } else {

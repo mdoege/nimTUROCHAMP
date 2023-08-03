@@ -23,6 +23,9 @@
 .chessboard .selected.square {
   background-color: #2fc5ff;
 }
+.chessboard .lit.square {
+  background-color: #2fff90;
+}
 .chessboard .wP, .chessboard .wB, .chessboard .wN, 
 .chessboard .wR, .chessboard .wQ, .chessboard .wK,
 .chessboard .bP, .chessboard .bB, .chessboard .bN, 

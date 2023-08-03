@@ -372,6 +372,8 @@ function getmove(data) {
   spgn.innerHTML = game.pgn();
   thefen.innerHTML = game.fen();
   board.setPosition(game.fen());
+  board.lightSquare(mymove.from);
+  board.lightSquare(mymove.to);
   console.log("material balance", calculateMaterialValue(game.fen()));
   let new_quip = getQuip(calculateMaterialValue(game.fen()), game.turn());
   if (new_quip != comment.innerHTML) {
