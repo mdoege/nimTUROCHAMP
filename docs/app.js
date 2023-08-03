@@ -339,6 +339,15 @@ function getQuip(evaluation, side) {
   }
 }
 
+// code by phind.com / GPT-3
+async function typeTextIntoDiv(text, divId) {
+    let div = document.getElementById(divId);
+    for (let i = 0; i < text.length; i++) {
+        div.innerHTML += text[i];
+        await new Promise(resolve => setTimeout(resolve, 20)); // delay of 20ms
+    }
+}
+
 function getmove(data) {
   var moves = game.moves({ verbose: true });
   var mymove = "";
@@ -365,7 +374,8 @@ function getmove(data) {
   board.setPosition(game.fen());
   console.log("material balance", calculateMaterialValue(game.fen()));
   let new_quip = getQuip(calculateMaterialValue(game.fen()), game.turn());
-  comment.innerHTML = new_quip;
+  comment.innerHTML = "";
+  typeTextIntoDiv(new_quip, 'comment');
   if (new_quip[0] == "(") {
     balloon.innerHTML = "💭";
     theverb.innerHTML = "thinks";
