@@ -9,17 +9,39 @@ if ('serviceWorker' in navigator) {
 var game = new Chess();
 var worker = new Worker('ntcjs.js');
 
-var myvoice = "";
-if ('speechSynthesis' in window) {
-  var voices = speechSynthesis.getVoices();
-  /* for Safari we need to pick an English voice explicitly,
-     otherwise the system default is used */
-  for (i = 0; i < voices.length; i++) {
-    if (voices[i].lang == "en-US") {
-      myvoice = voices[i];
-      break;
+// code by phind.com / GPT-3
+function selectVoice() {
+  // Define a whitelist of preferred voices,
+  // also see https://talkrapp.com/speechSynthesis.html
+  const whitelist = ['Alex', 'David', 'Alan', 'Matthew', 'Google US English', 'Samantha'];
+
+  // Get the list of available voices
+  let voices = window.speechSynthesis.getVoices();
+
+  // Filter for US English voices
+  voices = voices.filter(voice => voice.lang == 'en-US');
+
+  // If there are no US English voices, return ""
+  if (voices.length == 0) {
+    return "";
+  }
+
+  // Check if any of the preferred voices are available
+  for (let i = 0; i < whitelist.length; i++) {
+    let preferredVoice = voices.find(voice => voice.name == whitelist[i]);
+    if (preferredVoice) {
+      return preferredVoice;
     }
   }
+
+  // If none of the preferred voices are available, return the first US English voice
+  return voices[0];
+}
+
+var myvoice = "";
+if ('speechSynthesis' in window) {
+  myvoice = selectVoice();
+  console.log("selected voice:", myvoice.name);
 }
 
 function talk(text) {
