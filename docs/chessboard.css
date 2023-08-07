@@ -30,7 +30,7 @@
 .chessboard .wR, .chessboard .wQ, .chessboard .wK,
 .chessboard .bP, .chessboard .bB, .chessboard .bN, 
 .chessboard .bR, .chessboard .bQ, .chessboard .bK {
-  background-image: url(chesspieces.png);
+  background-image: url(chesspieces.svg);
 }
 .chessboard .promotion-overlay {
   display: none;

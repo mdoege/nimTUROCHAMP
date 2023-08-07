@@ -9,7 +9,7 @@ this.addEventListener('install', function(event) {
         '/nimTUROCHAMP/chess.js',
         '/nimTUROCHAMP/chessboard.css',
         '/nimTUROCHAMP/chessboard.js',
-        '/nimTUROCHAMP/chesspieces.png',
+        '/nimTUROCHAMP/chesspieces.svg',
         '/nimTUROCHAMP/fav192.png',
         '/nimTUROCHAMP/fav512.png',
         '/nimTUROCHAMP/favicon.png',
