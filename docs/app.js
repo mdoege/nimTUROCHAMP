@@ -206,7 +206,7 @@ function getQuip(evaluation, side) {
     "I've seen better chess thinking at a bridge tournament!",
     "Your chess is worse than a cucumber sandwich made by my housekeeper!",
     "Your chess skills are like Tarzan trying to write a novel!",
-    "Your play is more depressing than reading obituaries in The Times!",
+    "Your play is more depressing than reading obituaries in the Times!",
     "Your moves are less accurate than Big Ben when it's stopped for repairs!",
     "Your brain is like Buckingham Palace: large and mostly empty!",
     "Your moves are as timely as yesterday's newspaper!",
