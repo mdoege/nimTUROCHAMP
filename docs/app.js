@@ -373,6 +373,40 @@ function getmove(data) {
   var moves = game.moves({ verbose: true });
   var mymove = "";
 
+  // A very simple opening book for the first Black or White moves
+  //   (only use first part of FEN because of different en passant square handling in chess.js/SCID)
+  if (book.checked) {
+    let fens = game.fen().split(" ")[0];
+    if (fens == "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR") {
+      let ob = ["e2e4", "d2d4", "c2c4", "e2e3", "g1f3", "g2g3"];
+      data = ob[Math.floor(Math.random() * ob.length)];
+    }
+    // answers to e4
+    if (fens == "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR") {
+      let ob = ["c7c5", "e7e5", "e7e6"];
+      data = ob[Math.floor(Math.random() * ob.length)];
+    }
+    // answers to d4
+    if (fens == "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR") {
+      let ob = ["g8f6", "d7d5"];
+      data = ob[Math.floor(Math.random() * ob.length)];
+    }
+    // answers to c4
+    if (fens == "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR") {
+      let ob = ["g8f6", "e7e5", "c7c5"];
+      data = ob[Math.floor(Math.random() * ob.length)];
+    }
+    // answers to Nf3
+    if (fens == "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R") {
+      let ob = ["g8f6", "d7d5"];
+      data = ob[Math.floor(Math.random() * ob.length)];
+    }
+    // answers to g3
+    if (fens == "rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPP1P/RNBQKBNR") {
+      let ob = ["e7e5", "d7d5"];
+      data = ob[Math.floor(Math.random() * ob.length)];
+    }
+  }
   for (j = 0; j < moves.length; j++) {
     if (moves[j].from + moves[j].to == data) {
       mymove = moves[j];
