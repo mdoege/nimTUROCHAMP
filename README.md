@@ -6,12 +6,6 @@ A TUROCHAMP implementation in [Nim](https://nim-lang.org/) which uses the [Sunfi
 
 Here is a [web browser-based demo](https://mdoege.github.io/nimTUROCHAMP/) of nimTUROCHAMP built with "nim js", with the man himself dishing out some timeless chess advice. (Warning: working sense of humor required!) Use Shift-Reload in your browser (or clear your browser cache) if you are not seeing the latest web app version, which is currently "v19".
 
-## Compilation
-
-    nim c -d:danger --passC:"-flto" ntc
-
-These recommended compilation switches produce a faster engine binary by disabling Nim runtime checks and enabling link-time optimization, respectively.
-
 ## UCI parameters
 
 * MAXPLIES: maximum brute-force search depth

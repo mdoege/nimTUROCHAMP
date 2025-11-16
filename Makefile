@@ -1,8 +1,11 @@
 all: ntc ntcjs.js
 
 ntc: ntc.nim
-	nim c -d:danger --passC:"-flto" ntc
+	nim c -d:release --passC:"-flto" ntc
 
 ntcjs.js: ntcjs.nim ntc.nim
-	nim js -d:danger ntcjs
+	nim js -d:release ntcjs
+
+clean:
+	rm ntc ntcjs.js
 
